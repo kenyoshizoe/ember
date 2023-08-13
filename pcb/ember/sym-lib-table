@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "ember_49e")(type "KiCad")(uri "${KIPRJMOD}/lib/49E.kicad_sym")(options "")(descr ""))
+  (lib (name "ember_cd4051bm96")(type "KiCad")(uri "${KIPRJMOD}/lib/CD4051BM96.kicad_sym")(options "")(descr ""))
+)
