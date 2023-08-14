@@ -14,6 +14,7 @@ class CD4051B {
           GPIO_TypeDef* gpio_c_port, uint16_t gpio_c_pin);
   void SetCh(uint8_t ch);
   uint8_t GetCh() const { return ch_; }
+  void NextCh();
 
  private:
   GPIO_TypeDef* gpio_a_port_;

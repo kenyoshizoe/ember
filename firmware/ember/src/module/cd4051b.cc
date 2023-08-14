@@ -25,4 +25,8 @@ void CD4051B::SetCh(uint8_t ch) {
   HAL_GPIO_WritePin(gpio_c_port_, gpio_c_pin_,
                     (ch & 0b00000100) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
+void CD4051B::NextCh() {
+  ch_ = (ch_ + 1) % 8;
+  SetCh(ch_);
+}
 }  // namespace ember
