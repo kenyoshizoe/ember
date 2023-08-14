@@ -22,6 +22,7 @@ class CD4051B {
   uint16_t gpio_b_pin_;
   GPIO_TypeDef* gpio_c_port_;
   uint16_t gpio_c_pin_;
+  uint8_t ch_;
 };
 }  // namespace ember
 #endif  // EMBER_MODULE_CD4051B_H
