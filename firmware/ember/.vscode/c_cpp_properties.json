@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "STM32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/ember/app"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "USE_FULL_LL_DRIVER",
+                "STM32F303x8"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
