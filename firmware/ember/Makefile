@@ -157,6 +157,14 @@ CXXFLAGS += -g -gdwarf-2
 endif
 
 #######################################
+# TinyUSB
+#######################################
+C_SOURCES += \
+$(wildcard lib/tinyusb/src/**/*.c)
+C_INCLUDES += \
+-Ilib/tinyusb/src
+
+#######################################
 # LDFLAGS
 #######################################
 # link script
