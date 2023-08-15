@@ -62,6 +62,8 @@ void DMA2_Channel1_IRQHandler(void);
 void DMA2_Channel2_IRQHandler(void);
 void DMA2_Channel5_IRQHandler(void);
 void ADC4_IRQHandler(void);
+void USB_HP_IRQHandler(void);
+void USB_LP_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
