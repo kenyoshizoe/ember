@@ -65,6 +65,9 @@ Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pcd.c \
 Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pcd_ex.c \
 Core/Src/system_stm32f3xx.c
 
+TINYUSB_SRCDIRS = $(shell find lib/tinyusb/src -type d)
+C_SOURCES += $(foreach dir, $(TINYUSB_SRCDIRS), $(wildcard $(dir)/*.c))
+
 CXX_SOURCES =  \
 $(wildcard src/**/*.cc)
 
@@ -134,6 +137,9 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -Iinclude/ember/app
 
+C_INCLUDES += \
+-Ilib/tinyusb/src
+
 CXX_INCLUDES =  \
 $(C_INCLUDES) \
 -Iinclude
@@ -155,14 +161,6 @@ CXXFLAGS += $(MCU) $(CXX_DEFS) $(CXX_INCLUDES) $(OPT) -Wall -fdata-sections -ffu
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g -gdwarf-2
 endif
-
-#######################################
-# TinyUSB
-#######################################
-C_SOURCES += \
-$(wildcard lib/tinyusb/src/**/*.c)
-C_INCLUDES += \
--Ilib/tinyusb/src
 
 #######################################
 # LDFLAGS
