@@ -65,9 +65,6 @@ Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pcd.c \
 Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pcd_ex.c \
 Core/Src/system_stm32f3xx.c
 
-TINYUSB_SRCDIRS = $(shell find lib/tinyusb/src -type d)
-C_SOURCES += $(foreach dir, $(TINYUSB_SRCDIRS), $(wildcard $(dir)/*.c))
-
 CXX_SOURCES =  \
 $(wildcard src/**/*.cc)
 
@@ -176,6 +173,18 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
+#######################################
+# TinyUSB
+#######################################
+include lib/tinyusb/src/tinyusb.mk
+TINYUSB_SRC_C += src/portable/st/stm32_fsdev/dcd_stm32_fsdev.c
+C_SOURCES += $(addprefix lib/tinyusb/, $(TINYUSB_SRC_C))
+
+CFLAGS += \
+-flto \
+-nostdlib -nostartfiles \
+-DCFG_TUSB_MCU=OPT_MCU_STM32F3 \
+-Wno-error=unused-parameter
 
 #######################################
 # build the application
