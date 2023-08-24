@@ -95,8 +95,6 @@ void send_hid_report() {
   }
 
   HIDReport report = {0};
-  report.report.keys[0] = 0x04;  // a
-
   tud_hid_report(0, reinterpret_cast<uint8_t*>(report.raw), sizeof(report));
 }
 
@@ -104,7 +102,6 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report,
                                 uint16_t len) {
   (void)instance;
   (void)report;
-  send_hid_report();
 }
 
 // Invoked when received GET_REPORT control request
@@ -127,7 +124,6 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
                            hid_report_type_t report_type, uint8_t const* buffer,
                            uint16_t bufsize) {
   (void)instance;
-  send_hid_report();
 }
 
 // CDC
