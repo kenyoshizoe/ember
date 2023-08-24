@@ -1,5 +1,6 @@
 #include "ember/app/app.h"
 
+#include "SEGGER_RTT.h"
 #include "ember/module/cd4051b.h"
 
 // Modules
@@ -9,6 +10,9 @@ uint16_t adc_val[4];
 bool adc_half_complete = false;
 
 void setup() {
+  SEGGER_RTT_Init();
+  SEGGER_RTT_printf(0, "Ember startup.\n");
+
   amux = new ember::CD4051B(MUX_A_GPIO_Port, MUX_A_Pin, MUX_B_GPIO_Port,
                             MUX_B_Pin, MUX_C_GPIO_Port, MUX_C_Pin);
 
