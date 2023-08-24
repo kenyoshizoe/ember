@@ -172,6 +172,16 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+#######################################
+# SEGGER_RTT
+#######################################
+C_SOURCES += \
+lib/SEGGER_RTT/RTT/SEGGER_RTT.c \
+lib/SEGGER_RTT/RTT/SEGGER_RTT_printf.c
+
+C_INCLUDES += \
+-Ilib/SEGGER_RTT/Config \
+-Ilib/SEGGER_RTT/RTT
 
 #######################################
 # TinyUSB
