@@ -22,6 +22,7 @@
 #include "stm32f3xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "tusb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -236,6 +237,36 @@ void ADC1_2_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles USB high priority or CAN_TX interrupts.
+  */
+void USB_HP_CAN_TX_IRQHandler(void)
+{
+  /* USER CODE BEGIN USB_HP_CAN_TX_IRQn 0 */
+  tud_int_handler(0);
+  return;
+  /* USER CODE END USB_HP_CAN_TX_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_FS);
+  /* USER CODE BEGIN USB_HP_CAN_TX_IRQn 1 */
+
+  /* USER CODE END USB_HP_CAN_TX_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USB low priority or CAN_RX0 interrupts.
+  */
+void USB_LP_CAN_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 0 */
+  tud_int_handler(0);
+  return;
+  /* USER CODE END USB_LP_CAN_RX0_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_FS);
+  /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 1 */
+
+  /* USER CODE END USB_LP_CAN_RX0_IRQn 1 */
+}
+
+/**
   * @brief This function handles ADC3 global interrupt.
   */
 void ADC3_IRQHandler(void)
@@ -303,34 +334,6 @@ void ADC4_IRQHandler(void)
   /* USER CODE BEGIN ADC4_IRQn 1 */
 
   /* USER CODE END ADC4_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USB high priority interrupt remap.
-  */
-void USB_HP_IRQHandler(void)
-{
-  /* USER CODE BEGIN USB_HP_IRQn 0 */
-
-  /* USER CODE END USB_HP_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_FS);
-  /* USER CODE BEGIN USB_HP_IRQn 1 */
-
-  /* USER CODE END USB_HP_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USB low priority interrupt remap.
-  */
-void USB_LP_IRQHandler(void)
-{
-  /* USER CODE BEGIN USB_LP_IRQn 0 */
-
-  /* USER CODE END USB_LP_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_FS);
-  /* USER CODE BEGIN USB_LP_IRQn 1 */
-
-  /* USER CODE END USB_LP_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
