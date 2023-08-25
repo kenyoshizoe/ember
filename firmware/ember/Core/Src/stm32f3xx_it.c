@@ -64,6 +64,7 @@ extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern ADC_HandleTypeDef hadc3;
 extern ADC_HandleTypeDef hadc4;
+extern TIM_HandleTypeDef htim17;
 extern PCD_HandleTypeDef hpcd_USB_FS;
 /* USER CODE BEGIN EV */
 
@@ -264,6 +265,20 @@ void USB_LP_CAN_RX0_IRQHandler(void)
   /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 1 */
 
   /* USER CODE END USB_LP_CAN_RX0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 trigger, commutation and TIM17 interrupts.
+  */
+void TIM1_TRG_COM_TIM17_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 0 */
+
+  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim17);
+  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 1 */
+
+  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 1 */
 }
 
 /**

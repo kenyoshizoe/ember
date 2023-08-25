@@ -8,6 +8,7 @@ ember::CD4051B* amux;
 // Variables for DMA ADC
 uint16_t adc_val[4];
 bool adc_half_complete = false;
+bool adc_running = false;
 
 void send_hid_report();
 
@@ -23,46 +24,83 @@ void setup() {
   HAL_ADC_Start(&hadc3);
   HAL_ADC_Start(&hadc4);
 
+  adc_running = true;
   HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val), 1);
   HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
                                1);
 
+  HAL_TIM_Base_Start_IT(&htim17);
+
   // TinyUSB init
   tusb_init();
+
+  SEGGER_RTT_printf(0, "Setup process done.\n");
 }
 
 void loop() {
-  // SEGGER_RTT_printf(0, "loop\n");
   tud_task();
 
   // USB CDC Echoback Test
-  if (tud_cdc_available()) {
-    send_hid_report();
-
-    char buf[64];
-    uint32_t count = tud_cdc_read(reinterpret_cast<uint8_t*>(buf), 64);
-    (void)count;
+  int available_bytes = tud_cdc_available();
+  if (available_bytes != 0) {
+    char* buf = new char[available_bytes];
+    uint32_t count =
+        tud_cdc_read(reinterpret_cast<uint8_t*>(buf), available_bytes);
     tud_cdc_write(reinterpret_cast<uint8_t*>(buf), count);
     tud_cdc_write_flush();
-    SEGGER_RTT_printf(0, "CDC: %s\n", buf);
+    SEGGER_RTT_Write(0, buf, available_bytes);
+    SEGGER_RTT_printf(0, "\n");
+    delete[] buf;
   }
 }
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
+  if (htim == &htim17) {
+    if (adc_running) {
+      SEGGER_RTT_printf(0, "ADC is running\n");
+      return;
+    }
+    adc_running = true;
+    HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val),
+                                 1);
+    HAL_ADCEx_MultiModeStart_DMA(&hadc3,
+                                 reinterpret_cast<uint32_t*>(adc_val + 2), 1);
+    return;
+  }
+}
+
+uint16_t adc1_values[8] = {0};
+uint16_t adc2_values[8] = {0};
+uint16_t adc3_values[8] = {0};
+uint16_t adc4_values[8] = {0};
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
   if (hadc != &hadc1 && hadc != &hadc3) {
     return;
   }
 
-  if (adc_half_complete) {
-    adc_half_complete = false;
-    amux->NextCh();
-    HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val),
-                                 1);
-    HAL_ADCEx_MultiModeStart_DMA(&hadc3,
-                                 reinterpret_cast<uint32_t*>(adc_val + 2), 1);
-  } else {
+  if (!adc_half_complete) {
     adc_half_complete = true;
+    return;
   }
+
+  adc_half_complete = false;
+
+  adc1_values[amux->GetCh()] = adc_val[0];
+  adc2_values[amux->GetCh()] = adc_val[1];
+  adc3_values[amux->GetCh()] = adc_val[2];
+  adc4_values[amux->GetCh()] = adc_val[3];
+
+  amux->NextCh();
+
+  if (amux->GetCh() == 0) {
+    adc_running = false;
+    return;
+  }
+
+  HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val), 1);
+  HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
+                               1);
 }
 
 // USB

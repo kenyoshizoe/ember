@@ -5,10 +5,11 @@
 extern "C" {
 #endif
 
-#include "main.h"
 #include "adc.h"
-#include "tusb_config.h"
+#include "main.h"
+#include "tim.h"
 #include "tusb.h"
+#include "tusb_config.h"
 
 void setup(void);
 void loop(void);
