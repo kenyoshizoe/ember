@@ -73,7 +73,7 @@ void MX_ADC1_Init(void)
   */
   multimode.Mode = ADC_DUALMODE_REGSIMULT;
   multimode.DMAAccessMode = ADC_DMAACCESSMODE_12_10_BITS;
-  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_10CYCLES;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
   if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
   {
     Error_Handler();
@@ -186,7 +186,7 @@ void MX_ADC3_Init(void)
   */
   multimode.Mode = ADC_DUALMODE_REGSIMULT;
   multimode.DMAAccessMode = ADC_DMAACCESSMODE_12_10_BITS;
-  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_10CYCLES;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
   if (HAL_ADCEx_MultiModeConfigChannel(&hadc3, &multimode) != HAL_OK)
   {
     Error_Handler();

@@ -20,6 +20,7 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
+#include "tim.h"
 #include "usb.h"
 #include "gpio.h"
 
@@ -94,6 +95,7 @@ int main(void)
   MX_ADC3_Init();
   MX_ADC4_Init();
   MX_USB_PCD_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
   setup();
   /* USER CODE END 2 */
