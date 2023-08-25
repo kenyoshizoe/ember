@@ -53,15 +53,44 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
     return;
   }
 
-  if (adc_half_complete) {
-    adc_half_complete = false;
-    amux->NextCh();
-    HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val),
-                                 1);
-    HAL_ADCEx_MultiModeStart_DMA(&hadc3,
-                                 reinterpret_cast<uint32_t*>(adc_val + 2), 1);
-  } else {
+  if (!adc_half_complete) {
     adc_half_complete = true;
+    return;
+  }
+
+  adc_half_complete = false;
+  amux->NextCh();
+
+  static uint16_t adc1_values[8];
+  static uint16_t adc2_values[8];
+  static uint16_t adc3_values[8];
+  static uint16_t adc4_values[8];
+  adc1_values[amux->GetCh()] = adc_val[0];
+  adc2_values[amux->GetCh()] = adc_val[1];
+  adc3_values[amux->GetCh()] = adc_val[2];
+  adc4_values[amux->GetCh()] = adc_val[3];
+
+  HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val), 1);
+  HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
+                               1);
+
+  if (amux->GetCh() == 0) {
+    SEGGER_RTT_printf(0, "ADC1: %d %d %d %d %d %d %d %d    ", adc1_values[0],
+                      adc1_values[1], adc1_values[2], adc1_values[3],
+                      adc1_values[4], adc1_values[5], adc1_values[6],
+                      adc1_values[7]);
+    SEGGER_RTT_printf(0, "ADC2: %d %d %d %d %d %d %d %d    ", adc2_values[0],
+                      adc2_values[1], adc2_values[2], adc2_values[3],
+                      adc2_values[4], adc2_values[5], adc2_values[6],
+                      adc2_values[7]);
+    SEGGER_RTT_printf(0, "ADC3: %d %d %d %d %d %d %d %d    ", adc3_values[0],
+                      adc3_values[1], adc3_values[2], adc3_values[3],
+                      adc3_values[4], adc3_values[5], adc3_values[6],
+                      adc3_values[7]);
+    SEGGER_RTT_printf(0, "ADC4: %d %d %d %d %d %d %d %d\n", adc4_values[0],
+                      adc4_values[1], adc4_values[2], adc4_values[3],
+                      adc4_values[4], adc4_values[5], adc4_values[6],
+                      adc4_values[7]);
   }
 }
 
