@@ -2148,10 +2148,10 @@
     (uuid c434fd8b-dc74-41c6-a497-808b85cb69c4)
   )
 
-  (global_label "MUX1_C" (shape input) (at 81.28 45.72 0) (fields_autoplaced)
+  (global_label "MUX1_C" (shape input) (at 81.28 43.18 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 0186b8e9-25bc-4b65-a145-ba908a4df477)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 91.7037 45.72 0)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 91.7037 43.18 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
   )
@@ -2232,10 +2232,10 @@
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
   )
-  (global_label "MUX1_B" (shape input) (at 81.28 43.18 0) (fields_autoplaced)
+  (global_label "MUX1_B" (shape input) (at 81.28 45.72 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 32fc6786-c1c2-430a-b5e9-7b5f3a32a776)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 91.7037 43.18 0)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 91.7037 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
   )
@@ -2246,10 +2246,10 @@
       (effects (font (size 1.27 1.27)) (justify right) hide)
     )
   )
-  (global_label "SDA" (shape input) (at 199.39 113.03 270) (fields_autoplaced)
+  (global_label "SDA" (shape input) (at 203.2 113.03 270) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid 37f152d3-7092-4e6c-ac7e-87079882c46c)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 199.39 119.5833 90)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 203.2 119.5833 90)
       (effects (font (size 1.27 1.27)) (justify right) hide)
     )
   )
@@ -2316,10 +2316,10 @@
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
   )
-  (global_label "SCL" (shape input) (at 205.74 113.03 270) (fields_autoplaced)
+  (global_label "SCL" (shape input) (at 209.55 113.03 270) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid 82debf47-3121-47c9-bb59-7d9438ff7fb3)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 205.74 119.5228 90)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 209.55 119.5228 90)
       (effects (font (size 1.27 1.27)) (justify right) hide)
     )
   )
@@ -2418,7 +2418,7 @@
   (symbol (lib_id "power:GND") (at 266.7 116.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 06f4ea46-cf26-4730-bd46-3dd641b85022)
-    (property "Reference" "#PWR033" (at 266.7 123.19 0)
+    (property "Reference" "#PWR023" (at 266.7 123.19 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 266.7 121.92 0)
@@ -2434,7 +2434,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR033") (unit 1)
+          (reference "#PWR023") (unit 1)
         )
       )
     )
@@ -2443,7 +2443,7 @@
   (symbol (lib_id "power:+3.3V") (at 201.93 143.51 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0790df37-717b-465c-8b56-ba1f2107b7e1)
-    (property "Reference" "#PWR034" (at 198.12 143.51 0)
+    (property "Reference" "#PWR024" (at 198.12 143.51 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 205.74 143.51 90)
@@ -2459,7 +2459,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR034") (unit 1)
+          (reference "#PWR024") (unit 1)
         )
       )
     )
@@ -2497,7 +2497,7 @@
   (symbol (lib_id "Device:C_Small") (at 101.6 44.45 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 139ad129-c71b-4b3d-8405-606538954f49)
-    (property "Reference" "C3" (at 99.06 43.1863 0)
+    (property "Reference" "C1" (at 99.06 43.1863 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n" (at 99.06 45.7263 0)
@@ -2517,32 +2517,32 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C3") (unit 1)
+          (reference "C1") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "power:+3.3V") (at 199.39 107.95 0) (unit 1)
+  (symbol (lib_id "power:+3.3V") (at 203.2 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 190b9b3f-4d2a-4884-a14f-073016930b20)
-    (property "Reference" "#PWR039" (at 199.39 111.76 0)
+    (property "Reference" "#PWR015" (at 203.2 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "+3.3V" (at 199.39 102.87 0)
+    (property "Value" "+3.3V" (at 203.2 102.87 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 199.39 107.95 0)
+    (property "Footprint" "" (at 203.2 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at 199.39 107.95 0)
+    (property "Datasheet" "" (at 203.2 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid c2029bdd-9cbd-4215-84a0-d5191d9b0c3a))
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR039") (unit 1)
+          (reference "#PWR015") (unit 1)
         )
       )
     )
@@ -2551,7 +2551,7 @@
   (symbol (lib_id "Device:R_Small") (at 190.5 147.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1de7c790-296a-4fa9-b3f8-0973c306fb78)
-    (property "Reference" "R4" (at 193.04 146.05 90)
+    (property "Reference" "R8" (at 193.04 146.05 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 193.04 149.86 90)
@@ -2571,7 +2571,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "R4") (unit 1)
+          (reference "R8") (unit 1)
         )
       )
     )
@@ -2580,7 +2580,7 @@
   (symbol (lib_id "Connector:Conn_01x05_Socket") (at 232.41 147.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 20c204bd-66e8-4e25-a1cf-8bce1eb9e04a)
-    (property "Reference" "J3" (at 233.68 146.05 0)
+    (property "Reference" "J2" (at 233.68 146.05 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x05_Socket" (at 233.68 148.59 0)
@@ -2600,7 +2600,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "J3") (unit 1)
+          (reference "J2") (unit 1)
         )
       )
     )
@@ -2609,7 +2609,7 @@
   (symbol (lib_id "Power_Protection:SRV05-4") (at 241.3 57.15 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 232b89f7-415f-43fc-9b79-540ef2654945)
-    (property "Reference" "U34" (at 244.9261 41.91 0)
+    (property "Reference" "U1" (at 244.9261 41.91 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "SRV05-4" (at 244.9261 44.45 0)
@@ -2633,7 +2633,39 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "U34") (unit 1)
+          (reference "U1") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "Device:C_Small") (at 196.85 110.49 0) (mirror y) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 23a562e2-04ce-44ee-b20c-b2af64344f6b)
+    (property "Reference" "C8" (at 199.39 110.49 90)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "100n" (at 199.39 115.57 90)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 196.85 105.41 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 196.85 110.49 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "LCSC" "C14663" (at 196.85 110.49 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 024cfd54-41a4-492c-a0a3-5fd9e93b32af))
+    (pin "2" (uuid a4a751b1-391e-4f64-8525-f9ad0f6ff45d))
+    (instances
+      (project "ember"
+        (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
+          (reference "C8") (unit 1)
+        )
+        (path "/677b9f05-bf95-4903-b139-ff3eec86ab18/60df1394-7ac0-49f0-a83b-875d398ab3e9"
+          (reference "C13") (unit 1)
         )
       )
     )
@@ -2642,7 +2674,7 @@
   (symbol (lib_id "power:+5V") (at 228.6 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2ad8ea74-41a4-4611-99b1-9b8b5364d0fe)
-    (property "Reference" "#PWR023" (at 228.6 111.76 0)
+    (property "Reference" "#PWR017" (at 228.6 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 228.6 102.87 0)
@@ -2658,7 +2690,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR023") (unit 1)
+          (reference "#PWR017") (unit 1)
         )
       )
     )
@@ -2667,7 +2699,7 @@
   (symbol (lib_id "power:GND") (at 160.02 115.57 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 312f395a-171b-4246-a5c2-8e886e25fb9b)
-    (property "Reference" "#PWR031" (at 160.02 121.92 0)
+    (property "Reference" "#PWR021" (at 160.02 121.92 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 160.02 120.65 0)
@@ -2683,7 +2715,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR031") (unit 1)
+          (reference "#PWR021") (unit 1)
         )
       )
     )
@@ -2692,7 +2724,7 @@
   (symbol (lib_id "power:+3.3V") (at 251.46 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 32ef4c4c-9997-4d5d-91f0-33e736b1d9ef)
-    (property "Reference" "#PWR022" (at 251.46 111.76 0)
+    (property "Reference" "#PWR018" (at 251.46 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 251.46 102.87 0)
@@ -2708,7 +2740,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR022") (unit 1)
+          (reference "#PWR018") (unit 1)
         )
       )
     )
@@ -2792,7 +2824,7 @@
   (symbol (lib_id "power:+3.3V") (at 101.6 41.91 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3c924e88-63b2-4463-8311-6d5f682a13ae)
-    (property "Reference" "#PWR026" (at 101.6 45.72 0)
+    (property "Reference" "#PWR03" (at 101.6 45.72 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 101.6 36.83 0)
@@ -2808,7 +2840,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR026") (unit 1)
+          (reference "#PWR03") (unit 1)
         )
       )
     )
@@ -2817,7 +2849,7 @@
   (symbol (lib_id "Device:R_Small") (at 215.9 55.88 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3cd6da2d-d623-4f8e-aba2-e3fd0e7564bd)
-    (property "Reference" "R8" (at 218.44 57.15 90)
+    (property "Reference" "R3" (at 218.44 57.15 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1.5k" (at 218.44 53.34 90)
@@ -2837,7 +2869,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "R8") (unit 1)
+          (reference "R3") (unit 1)
         )
       )
     )
@@ -2875,7 +2907,7 @@
   (symbol (lib_id "Device:C_Small") (at 101.6 78.74 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 419b93af-520d-438d-a4ca-0e376a53f6ca)
-    (property "Reference" "C9" (at 99.06 77.4763 0)
+    (property "Reference" "C6" (at 99.06 77.4763 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10p" (at 99.06 80.0163 0)
@@ -2895,7 +2927,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C9") (unit 1)
+          (reference "C6") (unit 1)
         )
       )
     )
@@ -2904,7 +2936,7 @@
   (symbol (lib_id "power:GND") (at 240.03 115.57 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 42027701-b29a-49af-a25e-8f0737e6a4c1)
-    (property "Reference" "#PWR024" (at 240.03 121.92 0)
+    (property "Reference" "#PWR022" (at 240.03 121.92 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 240.03 120.65 0)
@@ -2920,7 +2952,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR024") (unit 1)
+          (reference "#PWR022") (unit 1)
         )
       )
     )
@@ -2929,7 +2961,7 @@
   (symbol (lib_id "power:GND") (at 177.8 78.74 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 49518a34-c3e6-4fa1-b34c-6d78f72b4dd7)
-    (property "Reference" "#PWR020" (at 177.8 85.09 0)
+    (property "Reference" "#PWR010" (at 177.8 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 177.8 83.82 0)
@@ -2945,7 +2977,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR020") (unit 1)
+          (reference "#PWR010") (unit 1)
         )
       )
     )
@@ -2985,7 +3017,7 @@
   (symbol (lib_id "power:+5V") (at 266.7 104.14 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 50c51203-3e5b-4d42-bca6-ad04c4e4686f)
-    (property "Reference" "#PWR032" (at 266.7 107.95 0)
+    (property "Reference" "#PWR012" (at 266.7 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 266.7 99.06 0)
@@ -3001,7 +3033,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR032") (unit 1)
+          (reference "#PWR012") (unit 1)
         )
       )
     )
@@ -3010,7 +3042,7 @@
   (symbol (lib_id "Device:C_Small") (at 137.16 44.45 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 549ffbf2-a1ff-4454-83da-63d2775ff2bb)
-    (property "Reference" "C7" (at 134.62 43.1863 0)
+    (property "Reference" "C5" (at 134.62 43.1863 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10n" (at 134.62 45.7263 0)
@@ -3030,7 +3062,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C7") (unit 1)
+          (reference "C5") (unit 1)
         )
       )
     )
@@ -3039,7 +3071,7 @@
   (symbol (lib_id "Device:LED") (at 266.7 107.95 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5628fb71-2e7e-4144-9dc8-7e1af7bf7f3f)
-    (property "Reference" "D2" (at 270.51 108.2675 90)
+    (property "Reference" "D1" (at 270.51 108.2675 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "LED" (at 270.51 110.8075 90)
@@ -3059,7 +3091,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "D2") (unit 1)
+          (reference "D1") (unit 1)
         )
       )
     )
@@ -3068,7 +3100,7 @@
   (symbol (lib_id "power:+3.3V") (at 215.9 53.34 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5befdedd-99b9-48a2-a5cd-80cf27b0c002)
-    (property "Reference" "#PWR041" (at 215.9 57.15 0)
+    (property "Reference" "#PWR07" (at 215.9 57.15 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 215.9 48.26 0)
@@ -3084,7 +3116,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR041") (unit 1)
+          (reference "#PWR07") (unit 1)
         )
       )
     )
@@ -3093,7 +3125,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 63.5 171.45 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6019ab14-e950-48d6-aa28-ff24f2adcbfc)
-    (property "Reference" "H33" (at 66.04 170.18 0)
+    (property "Reference" "H1" (at 66.04 170.18 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 66.04 172.72 0)
@@ -3108,7 +3140,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "H33") (unit 1)
+          (reference "H1") (unit 1)
         )
       )
     )
@@ -3117,7 +3149,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 83.82 171.45 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 602d7375-18e3-4bc4-8050-cb66d1420c49)
-    (property "Reference" "H36" (at 86.36 170.18 0)
+    (property "Reference" "H2" (at 86.36 170.18 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 86.36 172.72 0)
@@ -3132,7 +3164,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "H36") (unit 1)
+          (reference "H2") (unit 1)
         )
       )
     )
@@ -3141,7 +3173,7 @@
   (symbol (lib_id "Device:C_Small") (at 251.46 110.49 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6208ad27-ad2f-4f29-bf14-9d04669ff2e4)
-    (property "Reference" "C1" (at 254 109.2263 0)
+    (property "Reference" "C10" (at 254 109.2263 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "22u" (at 254 111.7663 0)
@@ -3161,7 +3193,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C1") (unit 1)
+          (reference "C10") (unit 1)
         )
       )
     )
@@ -3170,7 +3202,7 @@
   (symbol (lib_id "power:GND") (at 101.6 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6282dd3c-b5a6-40e7-8482-2711a4f6c6fe)
-    (property "Reference" "#PWR027" (at 101.6 53.34 0)
+    (property "Reference" "#PWR05" (at 101.6 53.34 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 101.6 52.07 0)
@@ -3186,7 +3218,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR027") (unit 1)
+          (reference "#PWR05") (unit 1)
         )
       )
     )
@@ -3195,7 +3227,7 @@
   (symbol (lib_id "power:+3.3V") (at 185.42 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6792981d-89c3-4682-a226-9461a48fd599)
-    (property "Reference" "#PWR038" (at 185.42 111.76 0)
+    (property "Reference" "#PWR013" (at 185.42 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 185.42 102.87 0)
@@ -3211,7 +3243,35 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR038") (unit 1)
+          (reference "#PWR013") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "power:GND") (at 196.85 113.03 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid 6a7ea97e-a778-4749-af49-029e7253e24f)
+    (property "Reference" "#PWR019" (at 196.85 119.38 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Value" "GND" (at 196.85 118.11 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "" (at 196.85 113.03 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "" (at 196.85 113.03 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 2feaf113-7d16-4006-a9e9-1a8aa82e34b2))
+    (instances
+      (project "ember"
+        (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
+          (reference "#PWR019") (unit 1)
+        )
+        (path "/677b9f05-bf95-4903-b139-ff3eec86ab18/60df1394-7ac0-49f0-a83b-875d398ab3e9"
+          (reference "#PWR016") (unit 1)
         )
       )
     )
@@ -3220,7 +3280,7 @@
   (symbol (lib_id "power:GND") (at 190.5 149.86 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6facc931-0b73-4a46-a409-0807ba4733e0)
-    (property "Reference" "#PWR029" (at 190.5 156.21 0)
+    (property "Reference" "#PWR026" (at 190.5 156.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 190.5 153.67 90)
@@ -3236,7 +3296,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR029") (unit 1)
+          (reference "#PWR026") (unit 1)
         )
       )
     )
@@ -3245,7 +3305,7 @@
   (symbol (lib_id "Connector:USB_C_Receptacle_USB2.0") (at 177.8 55.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 716c5ba3-e18f-4f41-81ed-e4d635e13c4d)
-    (property "Reference" "J2" (at 177.8 33.02 0)
+    (property "Reference" "J1" (at 177.8 33.02 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "USB_C_Receptacle_USB2.0" (at 177.8 35.56 0)
@@ -3280,7 +3340,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "J2") (unit 1)
+          (reference "J1") (unit 1)
         )
       )
     )
@@ -3289,7 +3349,7 @@
   (symbol (lib_id "Regulator_Linear:AMS1117-3.3") (at 240.03 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 77431ee4-1377-48c0-9c22-b6267f4dd20f)
-    (property "Reference" "U33" (at 240.03 101.6 0)
+    (property "Reference" "U2" (at 240.03 101.6 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "AMS1117-3.3" (at 240.03 104.14 0)
@@ -3310,7 +3370,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "U33") (unit 1)
+          (reference "U2") (unit 1)
         )
       )
     )
@@ -3319,7 +3379,7 @@
   (symbol (lib_id "power:+5V") (at 193.04 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 79595d64-4ca4-4c5e-a23a-4829ae3f074b)
-    (property "Reference" "#PWR017" (at 193.04 44.45 0)
+    (property "Reference" "#PWR02" (at 193.04 44.45 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 193.04 35.56 0)
@@ -3335,7 +3395,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR017") (unit 1)
+          (reference "#PWR02") (unit 1)
         )
       )
     )
@@ -3344,7 +3404,7 @@
   (symbol (lib_id "ember_m24c64:M24C64-RMN6TP") (at 160.02 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7ffbcf71-ef60-4d65-a122-14bfae84d6af)
-    (property "Reference" "IC5" (at 172.72 100.33 0)
+    (property "Reference" "IC1" (at 172.72 100.33 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "M24C64-RMN6TP" (at 172.72 102.87 0)
@@ -3385,7 +3445,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "IC5") (unit 1)
+          (reference "IC1") (unit 1)
         )
       )
     )
@@ -3394,7 +3454,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 83.82 176.53 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8a7fec42-3b12-430e-a8dd-898f410910be)
-    (property "Reference" "H37" (at 86.36 175.26 0)
+    (property "Reference" "H4" (at 86.36 175.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 86.36 177.8 0)
@@ -3409,7 +3469,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "H37") (unit 1)
+          (reference "H4") (unit 1)
         )
       )
     )
@@ -3418,7 +3478,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 171.45 148.59 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8caaf2cc-7686-4ff8-bff4-b028fd39ba2c)
-    (property "Reference" "SW1" (at 175.26 147.32 90)
+    (property "Reference" "SW2" (at 175.26 147.32 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "RESET" (at 175.26 149.86 90)
@@ -3438,7 +3498,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "SW1") (unit 1)
+          (reference "SW2") (unit 1)
         )
       )
     )
@@ -3447,7 +3507,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 63.5 181.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8d9bf9a6-4423-4b8e-aa4f-d92213475be9)
-    (property "Reference" "H35" (at 66.04 180.34 0)
+    (property "Reference" "H5" (at 66.04 180.34 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 66.04 182.88 0)
@@ -3462,7 +3522,35 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "H35") (unit 1)
+          (reference "H5") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "power:+3.3V") (at 196.85 107.95 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid 8e2ca626-f84c-4d83-8d77-57a1f84924df)
+    (property "Reference" "#PWR014" (at 196.85 111.76 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Value" "+3.3V" (at 196.85 102.87 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "" (at 196.85 107.95 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "" (at 196.85 107.95 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 0b29052b-c2ef-4ed1-90a0-e57e6c644eba))
+    (instances
+      (project "ember"
+        (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
+          (reference "#PWR014") (unit 1)
+        )
+        (path "/677b9f05-bf95-4903-b139-ff3eec86ab18/60df1394-7ac0-49f0-a83b-875d398ab3e9"
+          (reference "#PWR014") (unit 1)
         )
       )
     )
@@ -3471,7 +3559,7 @@
   (symbol (lib_id "Device:C_Small") (at 120.65 44.45 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 98cf33b0-ca9a-4b2e-bf7f-d1d254be6828)
-    (property "Reference" "C5" (at 118.11 43.1863 0)
+    (property "Reference" "C3" (at 118.11 43.1863 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n" (at 118.11 45.7263 0)
@@ -3491,7 +3579,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C5") (unit 1)
+          (reference "C3") (unit 1)
         )
       )
     )
@@ -3500,7 +3588,7 @@
   (symbol (lib_id "Device:R_Small") (at 266.7 114.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a3a280f0-cc1e-40f5-86ad-10f898bdf968)
-    (property "Reference" "R5" (at 264.16 113.03 90)
+    (property "Reference" "R7" (at 264.16 113.03 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "470" (at 264.16 116.84 90)
@@ -3520,7 +3608,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "R5") (unit 1)
+          (reference "R7") (unit 1)
         )
       )
     )
@@ -3529,7 +3617,7 @@
   (symbol (lib_id "power:GND") (at 171.45 153.67 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a45b9667-afde-4e06-8ebc-08bb13bb62a3)
-    (property "Reference" "#PWR030" (at 171.45 160.02 0)
+    (property "Reference" "#PWR028" (at 171.45 160.02 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 171.45 158.75 0)
@@ -3545,7 +3633,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR030") (unit 1)
+          (reference "#PWR028") (unit 1)
         )
       )
     )
@@ -3554,7 +3642,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 83.82 181.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid aa3c7c8e-c36e-4505-8c4d-0e32aa2cbf9f)
-    (property "Reference" "H38" (at 86.36 180.34 0)
+    (property "Reference" "H6" (at 86.36 180.34 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 86.36 182.88 0)
@@ -3569,7 +3657,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "H38") (unit 1)
+          (reference "H6") (unit 1)
         )
       )
     )
@@ -3578,7 +3666,7 @@
   (symbol (lib_id "power:GND") (at 227.33 149.86 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b5342c6b-f82b-4bdd-b019-e27368d5595b)
-    (property "Reference" "#PWR043" (at 220.98 149.86 0)
+    (property "Reference" "#PWR027" (at 220.98 149.86 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 223.52 149.86 90)
@@ -3594,28 +3682,28 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR043") (unit 1)
+          (reference "#PWR027") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "Device:R_Small") (at 199.39 110.49 0) (unit 1)
+  (symbol (lib_id "Device:R_Small") (at 203.2 110.49 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid bbb5a262-5ac4-4049-ba65-fc2e7c64073f)
-    (property "Reference" "R7" (at 201.93 109.22 90)
+    (property "Reference" "R5" (at 205.74 109.22 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "10k" (at 201.93 113.03 90)
+    (property "Value" "10k" (at 205.74 113.03 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 199.39 110.49 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 203.2 110.49 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at 199.39 110.49 0)
+    (property "Datasheet" "" (at 203.2 110.49 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "C25804" (at 199.39 110.49 90)
+    (property "LCSC" "C25804" (at 203.2 110.49 90)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 50d83ca5-684e-4462-9751-a4dbcb9800ee))
@@ -3623,7 +3711,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "R7") (unit 1)
+          (reference "R5") (unit 1)
         )
       )
     )
@@ -3661,7 +3749,7 @@
   (symbol (lib_id "power:+3.3V") (at 227.33 144.78 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c94b5d0a-f8c2-43d1-967e-e04c3086e473)
-    (property "Reference" "#PWR042" (at 231.14 144.78 0)
+    (property "Reference" "#PWR025" (at 231.14 144.78 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 223.52 144.78 90)
@@ -3677,7 +3765,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR042") (unit 1)
+          (reference "#PWR025") (unit 1)
         )
       )
     )
@@ -3686,7 +3774,7 @@
   (symbol (lib_id "Device:C_Small") (at 111.76 44.45 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ce199d47-15ad-44d4-8164-1150a41ba5cb)
-    (property "Reference" "C4" (at 109.22 43.1863 0)
+    (property "Reference" "C2" (at 109.22 43.1863 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n" (at 109.22 45.7263 0)
@@ -3706,7 +3794,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C4") (unit 1)
+          (reference "C2") (unit 1)
         )
       )
     )
@@ -3715,7 +3803,7 @@
   (symbol (lib_id "power:+5V") (at 241.3 44.45 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ce32f791-72a9-4965-ac34-44ec4d2c6e38)
-    (property "Reference" "#PWR037" (at 241.3 48.26 0)
+    (property "Reference" "#PWR04" (at 241.3 48.26 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 241.3 39.37 0)
@@ -3731,7 +3819,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR037") (unit 1)
+          (reference "#PWR04") (unit 1)
         )
       )
     )
@@ -3740,7 +3828,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 63.5 176.53 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d1bbe8e3-2558-43af-91da-635cb37e40b6)
-    (property "Reference" "H34" (at 66.04 175.26 0)
+    (property "Reference" "H3" (at 66.04 175.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 66.04 177.8 0)
@@ -3755,7 +3843,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "H34") (unit 1)
+          (reference "H3") (unit 1)
         )
       )
     )
@@ -3764,7 +3852,7 @@
   (symbol (lib_id "Device:C_Small") (at 116.84 78.74 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d2d35c08-e1c1-40df-91c2-f9a001fbc36f)
-    (property "Reference" "C10" (at 119.38 77.4763 0)
+    (property "Reference" "C7" (at 119.38 77.4763 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10p" (at 119.38 80.0163 0)
@@ -3784,7 +3872,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C10") (unit 1)
+          (reference "C7") (unit 1)
         )
       )
     )
@@ -3793,7 +3881,7 @@
   (symbol (lib_id "Device:C_Small") (at 228.6 110.49 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d44f853e-9dd6-4642-be3b-e37820d0d565)
-    (property "Reference" "C2" (at 226.06 109.2263 0)
+    (property "Reference" "C9" (at 226.06 109.2263 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10u" (at 226.06 111.7663 0)
@@ -3813,7 +3901,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C2") (unit 1)
+          (reference "C9") (unit 1)
         )
       )
     )
@@ -3822,7 +3910,7 @@
   (symbol (lib_id "power:GND") (at 64.77 114.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid db4240de-407e-4479-a8a7-3c95ffa09994)
-    (property "Reference" "#PWR019" (at 64.77 120.65 0)
+    (property "Reference" "#PWR020" (at 64.77 120.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 64.77 119.38 0)
@@ -3838,7 +3926,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR019") (unit 1)
+          (reference "#PWR020") (unit 1)
         )
       )
     )
@@ -3847,7 +3935,7 @@
   (symbol (lib_id "power:GND") (at 241.3 69.85 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid defe6c30-a517-4418-99f4-c90746fbcecf)
-    (property "Reference" "#PWR036" (at 241.3 76.2 0)
+    (property "Reference" "#PWR08" (at 241.3 76.2 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 238.76 69.85 0)
@@ -3863,32 +3951,32 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR036") (unit 1)
+          (reference "#PWR08") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "power:+3.3V") (at 205.74 107.95 0) (unit 1)
+  (symbol (lib_id "power:+3.3V") (at 209.55 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid df01dc75-dc68-470d-b4dd-013aae2a7e64)
-    (property "Reference" "#PWR040" (at 205.74 111.76 0)
+    (property "Reference" "#PWR016" (at 209.55 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "+3.3V" (at 205.74 102.87 0)
+    (property "Value" "+3.3V" (at 209.55 102.87 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 205.74 107.95 0)
+    (property "Footprint" "" (at 209.55 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at 205.74 107.95 0)
+    (property "Datasheet" "" (at 209.55 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 5ae2635e-d399-404d-b171-3d6c0e57cc9e))
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR040") (unit 1)
+          (reference "#PWR016") (unit 1)
         )
       )
     )
@@ -3897,7 +3985,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 196.85 143.51 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e15fb4d0-973e-43ec-925a-f886283011ce)
-    (property "Reference" "SW2" (at 196.85 135.89 0)
+    (property "Reference" "SW1" (at 196.85 135.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "BOOT" (at 196.85 138.43 0)
@@ -3917,7 +4005,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "SW2") (unit 1)
+          (reference "SW1") (unit 1)
         )
       )
     )
@@ -3926,7 +4014,7 @@
   (symbol (lib_id "Device:R_Small") (at 101.6 73.66 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e22db95d-78b3-467f-8c57-aa6a1bb12392)
-    (property "Reference" "R3" (at 99.06 74.93 90)
+    (property "Reference" "R4" (at 99.06 74.93 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 99.06 71.12 90)
@@ -3946,7 +4034,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "R3") (unit 1)
+          (reference "R4") (unit 1)
         )
       )
     )
@@ -3955,7 +4043,7 @@
   (symbol (lib_id "power:+3.3V") (at 60.96 35.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e7240919-6e02-4579-8c43-279a6d61a279)
-    (property "Reference" "#PWR018" (at 60.96 39.37 0)
+    (property "Reference" "#PWR01" (at 60.96 39.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 60.96 30.48 0)
@@ -3971,7 +4059,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR018") (unit 1)
+          (reference "#PWR01") (unit 1)
         )
       )
     )
@@ -3980,7 +4068,7 @@
   (symbol (lib_id "power:GND") (at 201.93 46.99 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ee8a6bc4-a7d2-49fd-9fd0-47afb9d9de91)
-    (property "Reference" "#PWR021" (at 208.28 46.99 0)
+    (property "Reference" "#PWR06" (at 208.28 46.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 201.93 43.18 0)
@@ -3996,28 +4084,28 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR021") (unit 1)
+          (reference "#PWR06") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "Device:R_Small") (at 205.74 110.49 0) (unit 1)
+  (symbol (lib_id "Device:R_Small") (at 209.55 110.49 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid efa57632-9680-41de-b34c-a7a9770e146a)
-    (property "Reference" "R6" (at 208.28 109.22 90)
+    (property "Reference" "R6" (at 212.09 109.22 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "10k" (at 208.28 113.03 90)
+    (property "Value" "10k" (at 212.09 113.03 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 205.74 110.49 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 209.55 110.49 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at 205.74 110.49 0)
+    (property "Datasheet" "" (at 209.55 110.49 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "C25804" (at 205.74 110.49 90)
+    (property "LCSC" "C25804" (at 209.55 110.49 90)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid fff93c88-ea75-4762-a724-94585d86d12d))
@@ -4034,7 +4122,7 @@
   (symbol (lib_id "power:GND") (at 109.22 71.12 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f57ad107-94f4-4c84-aaa9-a884dbeec798)
-    (property "Reference" "#PWR028" (at 109.22 64.77 0)
+    (property "Reference" "#PWR09" (at 109.22 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 109.22 66.04 0)
@@ -4050,7 +4138,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR028") (unit 1)
+          (reference "#PWR09") (unit 1)
         )
       )
     )
@@ -4059,7 +4147,7 @@
   (symbol (lib_id "Device:C_Small") (at 129.54 44.45 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f6632d29-ef09-49df-ae08-81b72dedb500)
-    (property "Reference" "C6" (at 127 43.1863 0)
+    (property "Reference" "C4" (at 127 43.1863 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n" (at 127 45.7263 0)
@@ -4079,7 +4167,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "C6") (unit 1)
+          (reference "C4") (unit 1)
         )
       )
     )
@@ -4088,7 +4176,7 @@
   (symbol (lib_id "power:GND") (at 109.22 81.28 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f7f8bf5c-8c80-4968-b47d-b485f938f84e)
-    (property "Reference" "#PWR025" (at 109.22 87.63 0)
+    (property "Reference" "#PWR011" (at 109.22 87.63 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 109.22 86.36 0)
@@ -4104,7 +4192,7 @@
     (instances
       (project "ember"
         (path "/677b9f05-bf95-4903-b139-ff3eec86ab18"
-          (reference "#PWR025") (unit 1)
+          (reference "#PWR011") (unit 1)
         )
       )
     )
