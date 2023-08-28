@@ -3,4 +3,5 @@
   (lib (name "ember_49e")(type "KiCad")(uri "${KIPRJMOD}/lib/49E.kicad_sym")(options "")(descr ""))
   (lib (name "ember_cd4051bm96")(type "KiCad")(uri "${KIPRJMOD}/lib/CD4051BM96.kicad_sym")(options "")(descr ""))
   (lib (name "ember_m24c64")(type "KiCad")(uri "${KIPRJMOD}/lib/M24C64-RMN6TP.kicad_sym")(options "")(descr ""))
+  (lib (name "ember_adg708")(type "KiCad")(uri "${KIPRJMOD}/lib/ADG708BRUZ-REEL7.kicad_sym")(options "")(descr ""))
 )
