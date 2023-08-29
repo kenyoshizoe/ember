@@ -1,21 +1,13 @@
 #ifndef EMBER_KEYBOARD_KEYSWITCH_H_
 #define EMBER_KEYBOARD_KEYSWITCH_H_
 
+#include "ember/keyboard/config.h"
 #include "main.h"
 
 namespace ember {
 class KeySwitchBase {
  public:
-  struct Config {
-    uint8_t key_code = 0;
-    /**
-     * @brief 0: ThresholdKey
-     */
-    uint8_t key_type = 0;
-    uint16_t max_value = 4095;
-    uint16_t min_value = 0;
-    uint8_t threshold_percent = 50;
-  };
+  using Config = KeySwitchConfig;
 
   KeySwitchBase() = default;
   KeySwitchBase(const Config& config) : config_(config) {}
