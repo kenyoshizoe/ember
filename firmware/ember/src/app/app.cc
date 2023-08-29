@@ -119,19 +119,20 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
   // Check both ADCs are completed
   if (hadc == &hadc1) {
     adc1_complete = true;
+    keyboard->SetADCValue(0, amux->GetCh(), adc_val[0]);
+    keyboard->SetADCValue(1, amux->GetCh(), adc_val[1]);
   }
   if (hadc == &hadc3) {
     adc3_complete = true;
+    keyboard->SetADCValue(2, amux->GetCh(), adc_val[2]);
+    keyboard->SetADCValue(3, amux->GetCh(), adc_val[3]);
   }
   if (!adc1_complete || !adc3_complete) {
     return;
   }
+
   adc1_complete = false;
   adc3_complete = false;
-
-  for (int i = 0; i < 4; i++) {
-    keyboard->SetADCValue(i, amux->GetCh(), adc_val[i]);
-  }
 
   amux->NextCh();
   if (amux->GetCh() == 0) {
@@ -143,32 +144,3 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
   HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
                                1);
 }
-
-// USB
-// Invoked when device is mounted
-void tud_mount_cb(void) { SEGGER_RTT_printf(0, "USB Connected\n"); }
-// Invoked when device is unmounted
-void tud_umount_cb(void) { SEGGER_RTT_printf(0, "USB Disconnected\n"); }
-// Invoked when usb bus is suspended
-// remote_wakeup_en : if host allow us  to perform remote wakeup
-// Within 7ms, device must draw an average of current less than 2.5 mA from bus
-void tud_suspend_cb(bool remote_wakeup_en) { (void)remote_wakeup_en; }
-// Invoked when usb bus is resumed
-void tud_resume_cb(void) {}
-
-// CDC
-// Invoked when cdc when line state changed e.g connected/disconnected
-void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
-  (void)itf;
-  (void)rts;
-
-  // TODO set some indicator
-  if (dtr) {
-    // Terminal connected
-  } else {
-    // Terminal disconnected
-  }
-}
-
-// Invoked when CDC interface received data from host
-void tud_cdc_rx_cb(uint8_t itf) { (void)itf; }
