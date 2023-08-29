@@ -1,19 +1,16 @@
 #include "ember/keyboard/keyboard.h"
 
 namespace ember {
-Keyboard::Keyboard() {
-  // clang-format off
-  uint8_t key_map_[32] = {
-    KC_ESCAPE, KC_1,          KC_2, KC_3, KC_4,        KC_5, KC_6,
-    KC_7     , KC_TAB,        KC_Q, KC_W, KC_E,        KC_R, KC_T,
-    KC_8     , KC_LEFT_SHIFT, KC_A, KC_S, KC_D,        KC_F, KC_G,
-    KC_M     , KC_LEFT_CTRL,  KC_Z, KC_X, KC_C,        KC_V,
-               KC_B,          KC_N, KC_B, KC_LEFT_ALT, KC_SPACE
-  };
-  // clang-format on
+Keyboard::Keyboard(Config config) : config_(config) {
   for (int i = 0; i < 32; i++) {
-    key_switches_[i] = new ThresholdKey();
-    key_switches_[i]->LoadConfig({key_map_[i], 0, 4095, 0, 90});
+    switch (config_.key_switch_configs[i].key_type) {
+      case 0:
+        key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i]);
+        break;
+      default:
+        key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i]);
+        break;
+    }
   }
 }
 

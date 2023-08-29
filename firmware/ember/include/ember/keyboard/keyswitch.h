@@ -9,8 +9,7 @@ class KeySwitchBase {
  public:
   using Config = KeySwitchConfig;
 
-  KeySwitchBase() = default;
-  KeySwitchBase(const Config& config) : config_(config) {}
+  KeySwitchBase(Config& config) : config_(config) {}
 
   /**
    * @brief Update the key state.
@@ -41,18 +40,19 @@ class KeySwitchBase {
   /**
    * @brief Get the config.
    */
-  void GetConfig(Config* config) { *config = config_; }
+  Config& GetConfig() { return config_; }
 
  protected:
   void Calibrate(uint16_t value);
 
   bool is_pressed_ = false;
   bool is_calibrating_ = false;
-  Config config_;
+  Config& config_;
 };
 
 class ThresholdKey : public KeySwitchBase {
  public:
+  ThresholdKey(Config& config) : KeySwitchBase(config) {}
   bool Update(uint16_t value) override;
 };
 
