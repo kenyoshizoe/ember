@@ -1,8 +1,10 @@
 #include "ember/app/app.h"
 
 #include "SEGGER_RTT.h"
+#include "ember/keyboard/config.h"
 #include "ember/keyboard/keyboard.h"
 #include "ember/module/cd4051b.h"
+#include "ember/module/flash.h"
 
 // Keyboard
 ember::Keyboard* keyboard;
@@ -17,10 +19,15 @@ bool adc_running = false;
 
 void setup() {
   SEGGER_RTT_Init();
-  SEGGER_RTT_printf(0, "Ember startup.\n");
 
-  // TODO: Load config from EEPROM
-  keyboard = new ember::Keyboard();
+  // Load Config
+  ember::Config config;
+  bool load_success = ember::Flash::LoadConfig(config);
+  keyboard = new ember::Keyboard(config);
+  // Start Calibrate at first time
+  if (!load_success) {
+    keyboard->StartCalibrate();
+  }
 
   amux = new ember::CD4051B(MUX_A_GPIO_Port, MUX_A_Pin, MUX_B_GPIO_Port,
                             MUX_B_Pin, MUX_C_GPIO_Port, MUX_C_Pin);
