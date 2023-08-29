@@ -77,13 +77,13 @@ void loop() {
         SEGGER_RTT_printf(0, "Stop calibrate\n");
         // Print calibration result
         for (int i = 0; i < 32; i++) {
-          ember::KeySwitchBase* key_switch = keyboard->key_switches_[i];
-          ember::KeySwitchBase::Config config;
-          key_switch->GetConfig(&config);
-          SEGGER_RTT_printf(0, "Key %d: %d %d\n", i, config.max_value,
+          ember::KeySwitchConfig config =
+              keyboard->key_switches_[i]->GetConfig();
+          SEGGER_RTT_printf(0, "Key %d: %d~%d\n", i, config.max_value,
                             config.min_value);
         }
         keyboard->StopCalibrate();
+        ember::Flash::SaveConfig(keyboard->GetConfig());
         break;
       default:
         break;
