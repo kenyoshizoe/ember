@@ -32,28 +32,22 @@ void setup() {
   amux = new ember::CD4051B(MUX_A_GPIO_Port, MUX_A_Pin, MUX_B_GPIO_Port,
                             MUX_B_Pin, MUX_C_GPIO_Port, MUX_C_Pin);
 
-  SEGGER_RTT_printf(0, "Setup ADC\n");
   HAL_ADC_Start(&hadc1);
   HAL_ADC_Start(&hadc2);
   HAL_ADC_Start(&hadc3);
   HAL_ADC_Start(&hadc4);
 
-  SEGGER_RTT_printf(0, "Setup ADC DMA\n");
   adc_running = true;
   HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val), 1);
   HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
                                1);
 
   // TinyUSB init
-  SEGGER_RTT_printf(0, "Setup USB\n");
   tusb_init();
 
-  SEGGER_RTT_printf(0, "Setup timer\n");
   HAL_TIM_Base_Start_IT(&htim17);
 
-  keyboard->StartCalibrate();
-
-  SEGGER_RTT_printf(0, "Setup process done.\n");
+  SEGGER_RTT_printf(0, "Ember startup.\n");
 }
 
 void loop() {
