@@ -22,7 +22,9 @@ bool ThresholdKey::Update(uint16_t value) {
     return false;
   }
 
-  if (value < config_.max_value * config_.threshold_percent / 100) {
+  if (value < (config_.max_value - config_.min_value) *
+                      config_.threshold_percent / 100 +
+                  config_.min_value) {
     is_pressed_ = true;
   } else {
     is_pressed_ = false;
