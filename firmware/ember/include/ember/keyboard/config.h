@@ -16,7 +16,8 @@ struct KeySwitchConfig {
   uint8_t key_type = 0;
   uint16_t max_value = 4095;
   uint16_t min_value = 0;
-  uint8_t threshold_percent = 50;
+  // actuation point in 0.1mm
+  uint16_t actuation_point = 20;
 } __attribute__((packed));
 
 /**

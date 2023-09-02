@@ -5,13 +5,6 @@
 
 namespace ember {
 void Flash::SaveConfig(const Config& config) {
-  SEGGER_RTT_printf(0, "Key1: %d, %d, %d, %d, %d\n",
-                    config.key_switch_configs[0].key_code,
-                    config.key_switch_configs[0].key_type,
-                    config.key_switch_configs[0].max_value,
-                    config.key_switch_configs[0].min_value,
-                    config.key_switch_configs[0].threshold_percent);
-
   HAL_FLASH_Unlock();
   FLASH_EraseInitTypeDef erase;
   erase.TypeErase = FLASH_TYPEERASE_PAGES;
@@ -48,23 +41,15 @@ bool Flash::LoadConfig(Config& config) {
     memcpy(&config, &default_config, sizeof(Config));
     return false;
   }
-
-  SEGGER_RTT_printf(0, "Key1: %d, %d, %d, %d, %d\n",
-                    config.key_switch_configs[0].key_code,
-                    config.key_switch_configs[0].key_type,
-                    config.key_switch_configs[0].max_value,
-                    config.key_switch_configs[0].min_value,
-                    config.key_switch_configs[0].threshold_percent);
-
   return true;
 }
 
 Config Flash::GetDefaultConfig() {
   Config default_config = {.key_switch_configs = {{
                                .key_type = 0,
-                               .max_value = 4095,
-                               .min_value = 0,
-                               .threshold_percent = 90,
+                               .max_value = 2048,
+                               .min_value = 1000,
+                               .actuation_point = 20,
                            }}};
   uint8_t default_key_map_[32] = {
       KC_ESCAPE, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6,         KC_7,
