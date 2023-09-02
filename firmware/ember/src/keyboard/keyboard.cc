@@ -7,6 +7,9 @@ Keyboard::Keyboard(Config config) : config_(config) {
       case 0:
         key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i]);
         break;
+      case 1:
+        key_switches_[i] = new RapidTriggerKey(config_.key_switch_configs[i]);
+        break;
       default:
         key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i]);
         break;

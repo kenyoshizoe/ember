@@ -64,6 +64,20 @@ class ThresholdKey : public KeySwitchBase {
   bool Update(uint16_t value) override;
 };
 
+class RapidTriggerKey : public KeySwitchBase {
+ public:
+  RapidTriggerKey(Config& config) : KeySwitchBase(config) {}
+  bool Update(uint16_t value) override;
+
+ private:
+  enum class State {
+    kRest,
+    kRapidTriggerDown,
+    kRapidTriggerUp
+  } state_ = State::kRest;
+  uint8_t peek_value_ = 0;
+};
+
 }  // namespace ember
 
 #endif  // EMBER_KEYBOARD_KEYSWITCH_H_

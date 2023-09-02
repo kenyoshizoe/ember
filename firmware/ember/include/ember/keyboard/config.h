@@ -6,23 +6,32 @@
 namespace ember {
 /**
  * @brief KeySwitchConfig
- * @note 32 bytes
+ * @note 9 bytes
  */
 struct KeySwitchConfig {
   uint8_t key_code = 0;
   /**
-   * @brief 0: ThresholdKey
+   * @brief
+   * 0: ThresholdKey
+   * 1: RappidTrigger
    */
   uint8_t key_type = 0;
-  uint16_t max_value = 4095;
-  uint16_t min_value = 0;
-  // actuation point in 0.1mm
-  uint16_t actuation_point = 20;
+  uint16_t max_value = 2048;
+  uint16_t min_value = 1000;
+  // actuation point in 0.1mm unit
+  uint8_t actuation_point = 3;
+  // RappidTrigger Settings
+  // 最も深く押したときの位置からどれだけ離れたらトリガーを解除するか。0.1mm単位。
+  // How far away from the deepest position to release the trigger. 0.1mm unit.
+  uint8_t rappid_trigger_up_sensivity = 2;
+  // 最も浅く押したときの位置からどれだけ離れたらトリガーを発動するか。0.1mm単位。
+  // How far away from the shallowest position to trigger. 0.1mm unit.
+  uint8_t rappid_trigger_down_sensivity = 2;
 } __attribute__((packed));
 
 /**
  * @brief Config
- * @note 1024 bytes
+ * @note 288 bytes
  */
 struct Config {
   KeySwitchConfig key_switch_configs[32];
