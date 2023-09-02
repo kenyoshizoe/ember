@@ -45,12 +45,7 @@ bool Flash::LoadConfig(Config& config) {
 }
 
 Config Flash::GetDefaultConfig() {
-  Config default_config = {.key_switch_configs = {{
-                               .key_type = 0,
-                               .max_value = 2048,
-                               .min_value = 1000,
-                               .actuation_point = 20,
-                           }}};
+  Config default_config;
   uint8_t default_key_map_[32] = {
       KC_ESCAPE, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6,         KC_7,
       KC_TAB,    KC_Q, KC_W, KC_E, KC_R, KC_T, KC_8,         KC_LEFT_SHIFT,
@@ -59,6 +54,11 @@ Config Flash::GetDefaultConfig() {
   for (int i = 0; i < 32; i++) {
     default_config.key_switch_configs[i].key_code = default_key_map_[i];
   }
+  // Enable RapidTrigger to WASDs
+  default_config.key_switch_configs[10].key_type = 1;
+  default_config.key_switch_configs[16].key_type = 1;
+  default_config.key_switch_configs[17].key_type = 1;
+  default_config.key_switch_configs[18].key_type = 1;
   return default_config;
 }
 }  // namespace ember
