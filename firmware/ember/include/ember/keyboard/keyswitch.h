@@ -3,6 +3,7 @@
 
 #include "ember/keyboard/config.h"
 #include "main.h"
+#include "math.h"
 
 namespace ember {
 class KeySwitchBase {
@@ -41,6 +42,10 @@ class KeySwitchBase {
    * @brief Get the config.
    */
   Config& GetConfig() { return config_; }
+  /**
+   * @brief Get the last position in 0.1mm.
+   */
+  uint8_t GetLastPosition() const { return last_position_; }
 
  protected:
   void Calibrate(uint16_t value);
@@ -49,6 +54,8 @@ class KeySwitchBase {
   bool is_pressed_ = false;
   bool is_calibrating_ = false;
   Config& config_;
+  // Last key potision in 0.1mm
+  uint8_t last_position_ = 0;
 };
 
 class ThresholdKey : public KeySwitchBase {
