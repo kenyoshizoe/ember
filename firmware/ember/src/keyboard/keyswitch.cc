@@ -37,7 +37,7 @@ bool ThresholdKey::Update(uint16_t value) {
     return false;
   }
   last_position_ = ADCValToDistance(value);
-  if (last_position_ < config_.actuation_point) {
+  if (last_position_ > config_.actuation_point) {
     is_pressed_ = true;
   } else {
     is_pressed_ = false;
