@@ -44,6 +44,7 @@ class KeySwitchBase {
 
  protected:
   void Calibrate(uint16_t value);
+  uint8_t ADCValToDistance(uint16_t value);
 
   bool is_pressed_ = false;
   bool is_calibrating_ = false;
