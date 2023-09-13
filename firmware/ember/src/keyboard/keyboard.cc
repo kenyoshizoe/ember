@@ -68,22 +68,22 @@ int8_t Keyboard::ChToIndex(uint8_t adc_ch, uint8_t amux_channel) {
   switch (adc_ch) {
     case 0:
       switch (amux_channel) {
-        case 0:
-          return 30;
-        case 1:
-          return 29;
-        case 2:
-          return 28;
-        case 3:
+        case 0: 
           return 31;
+        case 1:
+          return 30;
+        case 2:
+          return 29;
+        case 3:
+          return 28;
         case 4:
-          return 27;
-        case 5:
           return 26;
+        case 5:
+          return 25;
         case 6:
           return 24;
         case 7:
-          return 25;
+          return 27;
         default:
           return -1;
       }
@@ -91,21 +91,21 @@ int8_t Keyboard::ChToIndex(uint8_t adc_ch, uint8_t amux_channel) {
     case 1:
       switch (amux_channel) {
         case 0:
-          return 22;
-        case 1:
-          return 21;
-        case 2:
-          return 16;
-        case 3:
           return 23;
+        case 1:
+          return 22;
+        case 2:
+          return 21;
+        case 3:
+          return 16;
         case 4:
-          return 17;
-        case 5:
           return 19;
+        case 5:
+          return 18;
         case 6:
           return 20;
         case 7:
-          return 18;
+          return 17;
         default:
           return -1;
       }
@@ -113,21 +113,21 @@ int8_t Keyboard::ChToIndex(uint8_t adc_ch, uint8_t amux_channel) {
     case 2:
       switch (amux_channel) {
         case 0:
-          return 0;
+          return 15;
         case 1:
-          return 1;
+          return 14;
         case 2:
-          return 2;
+          return 8;
         case 3:
-          return 7;
+          return 9;
         case 4:
-          return 3;
+          return 11;
         case 5:
-          return 6;
+          return 12;
         case 6:
-          return 4;
+          return 13;
         case 7:
-          return 5;
+          return 10;
         default:
           return -1;
       }
@@ -135,21 +135,21 @@ int8_t Keyboard::ChToIndex(uint8_t adc_ch, uint8_t amux_channel) {
     case 3:
       switch (amux_channel) {
         case 0:
-          return 14;
+          return 7;
         case 1:
-          return 8;
+          return 0;
         case 2:
-          return 9;
+          return 1;
         case 3:
-          return 15;
+          return 2;
         case 4:
-          return 10;
+          return 6;
         case 5:
-          return 11;
+          return 5;
         case 6:
-          return 13;
+          return 4;
         case 7:
-          return 12;
+          return 3;
         default:
           return -1;
       }
