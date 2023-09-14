@@ -8,9 +8,13 @@
 
 // Keyboard
 ember::Keyboard* keyboard;
+// Config
+ember::Config config;
 // Modules
-ember::CD4051B* amux1;
-ember::CD4051B* amux2;
+ember::CD4051B amux1(MUX1_A_GPIO_Port, MUX1_A_Pin, MUX1_B_GPIO_Port, MUX1_B_Pin,
+                     MUX1_C_GPIO_Port, MUX1_C_Pin);
+ember::CD4051B amux2(MUX2_A_GPIO_Port, MUX2_A_Pin, MUX2_B_GPIO_Port, MUX2_B_Pin,
+                     MUX2_C_GPIO_Port, MUX2_C_Pin);
 
 // Variables for DMA ADC
 uint16_t adc_val[4];
@@ -19,21 +23,17 @@ bool adc34_running = false;
 
 void setup() {
   SEGGER_RTT_Init();
-
   // Load Config
-  ember::Config config;
   bool load_success = ember::Flash::LoadConfig(config);
   keyboard = new ember::Keyboard(config);
   // Start Calibrate at first time
   if (!load_success) {
     keyboard->StartCalibrate();
   }
-
-  amux1 = new ember::CD4051B(MUX1_A_GPIO_Port, MUX1_A_Pin, MUX1_B_GPIO_Port,
-                             MUX1_B_Pin, MUX1_C_GPIO_Port, MUX1_C_Pin);
-  amux2 = new ember::CD4051B(MUX2_A_GPIO_Port, MUX2_A_Pin, MUX2_B_GPIO_Port,
-                             MUX2_B_Pin, MUX2_C_GPIO_Port, MUX2_C_Pin);
-
+  // Init modules
+  amux1.Init();
+  amux2.Init();
+  // Start ADC
   HAL_ADC_Start(&hadc1);
   HAL_ADC_Start(&hadc2);
   HAL_ADC_Start(&hadc3);
@@ -43,10 +43,9 @@ void setup() {
   adc34_running = true;
   HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
                                1);
-
   // TinyUSB init
   tusb_init();
-
+  // Start Timer
   HAL_TIM_Base_Start_IT(&htim17);
 
   SEGGER_RTT_printf(0, "Ember startup.\n");
@@ -115,10 +114,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 
   // Check both ADCs are completed
   if (hadc == &hadc1) {
-    keyboard->SetADCValue(0, amux1->GetCh(), adc_val[0]);
-    keyboard->SetADCValue(1, amux1->GetCh(), adc_val[1]);
-    amux1->NextCh();
-    if (amux1->GetCh() == 0) {
+    keyboard->SetADCValue(0, amux1.GetCh(), adc_val[0]);
+    keyboard->SetADCValue(1, amux1.GetCh(), adc_val[1]);
+    amux1.NextCh();
+    if (amux1.GetCh() == 0) {
       adc12_running = false;
       return;
     }
@@ -126,10 +125,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
                                  1);
   }
   if (hadc == &hadc3) {
-    keyboard->SetADCValue(2, amux2->GetCh(), adc_val[2]);
-    keyboard->SetADCValue(3, amux2->GetCh(), adc_val[3]);
-    amux2->NextCh();
-    if (amux2->GetCh() == 0) {
+    keyboard->SetADCValue(2, amux2.GetCh(), adc_val[2]);
+    keyboard->SetADCValue(3, amux2.GetCh(), adc_val[3]);
+    amux2.NextCh();
+    if (amux2.GetCh() == 0) {
       adc34_running = false;
       return;
     }
