@@ -9,13 +9,13 @@
 // Keyboard
 ember::Keyboard* keyboard;
 // Modules
-ember::CD4051B* amux;
+ember::CD4051B* amux1;
+ember::CD4051B* amux2;
 
 // Variables for DMA ADC
 uint16_t adc_val[4];
-bool adc1_complete = false;
-bool adc3_complete = false;
-bool adc_running = false;
+bool adc12_running = false;
+bool adc34_running = false;
 
 void setup() {
   SEGGER_RTT_Init();
@@ -29,16 +29,18 @@ void setup() {
     keyboard->StartCalibrate();
   }
 
-  amux = new ember::CD4051B(MUX_A_GPIO_Port, MUX_A_Pin, MUX_B_GPIO_Port,
-                            MUX_B_Pin, MUX_C_GPIO_Port, MUX_C_Pin);
+  amux1 = new ember::CD4051B(MUX1_A_GPIO_Port, MUX1_A_Pin, MUX1_B_GPIO_Port,
+                             MUX1_B_Pin, MUX1_C_GPIO_Port, MUX1_C_Pin);
+  amux2 = new ember::CD4051B(MUX2_A_GPIO_Port, MUX2_A_Pin, MUX2_B_GPIO_Port,
+                             MUX2_B_Pin, MUX2_C_GPIO_Port, MUX2_C_Pin);
 
   HAL_ADC_Start(&hadc1);
   HAL_ADC_Start(&hadc2);
   HAL_ADC_Start(&hadc3);
   HAL_ADC_Start(&hadc4);
-
-  adc_running = true;
+  adc12_running = true;
   HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val), 1);
+  adc34_running = true;
   HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
                                1);
 
@@ -89,16 +91,17 @@ void loop() {
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
   if (htim == &htim17) {
-    if (adc_running) {
+    if (adc12_running || adc34_running) {
       SEGGER_RTT_printf(0, "ADC is running\n");
       return;
     }
 
     keyboard->Update();
 
-    adc_running = true;
+    adc12_running = true;
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val),
                                  1);
+    adc34_running = true;
     HAL_ADCEx_MultiModeStart_DMA(&hadc3,
                                  reinterpret_cast<uint32_t*>(adc_val + 2), 1);
     return;
@@ -112,29 +115,25 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 
   // Check both ADCs are completed
   if (hadc == &hadc1) {
-    adc1_complete = true;
-    keyboard->SetADCValue(0, amux->GetCh(), adc_val[0]);
-    keyboard->SetADCValue(1, amux->GetCh(), adc_val[1]);
+    keyboard->SetADCValue(0, amux1->GetCh(), adc_val[0]);
+    keyboard->SetADCValue(1, amux1->GetCh(), adc_val[1]);
+    amux1->NextCh();
+    if (amux1->GetCh() == 0) {
+      adc12_running = false;
+      return;
+    }
+    HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val),
+                                 1);
   }
   if (hadc == &hadc3) {
-    adc3_complete = true;
-    keyboard->SetADCValue(2, amux->GetCh(), adc_val[2]);
-    keyboard->SetADCValue(3, amux->GetCh(), adc_val[3]);
+    keyboard->SetADCValue(2, amux2->GetCh(), adc_val[2]);
+    keyboard->SetADCValue(3, amux2->GetCh(), adc_val[3]);
+    amux2->NextCh();
+    if (amux2->GetCh() == 0) {
+      adc34_running = false;
+      return;
+    }
+    HAL_ADCEx_MultiModeStart_DMA(&hadc3,
+                                 reinterpret_cast<uint32_t*>(adc_val + 2), 1);
   }
-  if (!adc1_complete || !adc3_complete) {
-    return;
-  }
-
-  adc1_complete = false;
-  adc3_complete = false;
-
-  amux->NextCh();
-  if (amux->GetCh() == 0) {
-    adc_running = false;
-    return;
-  }
-
-  HAL_ADCEx_MultiModeStart_DMA(&hadc1, reinterpret_cast<uint32_t*>(adc_val), 1);
-  HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
-                               1);
 }
