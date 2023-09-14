@@ -6,7 +6,7 @@
 namespace ember {
 /**
  * @brief KeySwitchConfig
- * @note 9 bytes
+ * @note 5 bytes
  */
 struct KeySwitchConfig {
   uint8_t key_code = 0;
@@ -16,8 +16,6 @@ struct KeySwitchConfig {
    * 1: RappidTrigger
    */
   uint8_t key_type = 0;
-  uint16_t max_value = 2048;
-  uint16_t min_value = 1000;
   // actuation point in 0.1mm unit
   uint8_t actuation_point = 3;
   // RappidTrigger Settings
@@ -30,11 +28,21 @@ struct KeySwitchConfig {
 } __attribute__((packed));
 
 /**
+ * @brief KeySwitchCalibrationData
+ * @note 4 bytes
+ */
+struct KeySwitchCalibrationData {
+  uint16_t max_value = 2048;
+  uint16_t min_value = 1000;
+} __attribute__((packed));
+
+/**
  * @brief Config
  * @note 288 bytes
  */
 struct Config {
   KeySwitchConfig key_switch_configs[32];
+  KeySwitchCalibrationData key_switch_calibration_data[32];
 } __attribute__((packed));
 }  // namespace ember
 

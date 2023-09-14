@@ -2,33 +2,33 @@
 
 namespace ember {
 void KeySwitchBase::StartCalibrate() {
-  config_.max_value = 0;
-  config_.min_value = 4095;
+  calibration_data_.max_value = 0;
+  calibration_data_.min_value = 4095;
   is_calibrating_ = true;
 }
 void KeySwitchBase::StopCalibrate() { is_calibrating_ = false; }
 void KeySwitchBase::Calibrate(uint16_t value) {
-  if (value > config_.max_value) {
-    config_.max_value = value;
+  if (value > calibration_data_.max_value) {
+    calibration_data_.max_value = value;
   }
-  if (value < config_.min_value) {
-    config_.min_value = value;
+  if (value < calibration_data_.min_value) {
+    calibration_data_.min_value = value;
   }
 }
 
 uint8_t KeySwitchBase::ADCValToDistance(uint16_t value) {
-  if (value < config_.min_value) {
+  if (value < calibration_data_.min_value) {
     return 40;
   }
-  if (value > config_.max_value) {
+  if (value > calibration_data_.max_value) {
     return 0;
   }
 
   // a was precalculated by fitting the curve
   // distance vs ADC value data is needed to calculate
   float a = 200;
-  float b = log((config_.max_value - config_.min_value) / a + 1) / 4;
-  return log((config_.max_value - value) / a + 1) * 10 / b;
+  float b = log((calibration_data_.max_value - calibration_data_.min_value) / a + 1) / 4;
+  return log((calibration_data_.max_value - value) / a + 1) * 10 / b;
 }
 
 bool ThresholdKey::Update(uint16_t value) {

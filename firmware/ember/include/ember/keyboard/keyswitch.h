@@ -9,8 +9,10 @@ namespace ember {
 class KeySwitchBase {
  public:
   using Config = KeySwitchConfig;
+  using CalibrationData = KeySwitchCalibrationData;
 
-  KeySwitchBase(Config& config) : config_(config) {}
+  KeySwitchBase(Config& config, CalibrationData calibration_data)
+      : config_(config), calibration_data_(calibration_data) {}
 
   /**
    * @brief Update the key state.
@@ -54,19 +56,20 @@ class KeySwitchBase {
   bool is_pressed_ = false;
   bool is_calibrating_ = false;
   Config& config_;
+  CalibrationData& calibration_data_;
   // Last key potision in 0.1mm
   uint8_t last_position_ = 0;
 };
 
 class ThresholdKey : public KeySwitchBase {
  public:
-  ThresholdKey(Config& config) : KeySwitchBase(config) {}
+  using KeySwitchBase::KeySwitchBase;
   bool Update(uint16_t value) override;
 };
 
 class RapidTriggerKey : public KeySwitchBase {
  public:
-  RapidTriggerKey(Config& config) : KeySwitchBase(config) {}
+  using KeySwitchBase::KeySwitchBase;
   bool Update(uint16_t value) override;
 
  private:
