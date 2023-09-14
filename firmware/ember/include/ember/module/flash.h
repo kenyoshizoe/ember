@@ -11,10 +11,10 @@ class Flash {
  public:
   static void SaveConfig(const ember::Config& config);
   static bool LoadConfig(ember::Config& config);
+  static Config GetDefaultConfig();
 
  private:
   constexpr static uint32_t kFlashStartAddress = 0x801F800;
-  static Config GetDefaultConfig();
 };
 }  // namespace ember
 
