@@ -1,6 +1,7 @@
 #include "ember/app/app.h"
 
 #include "SEGGER_RTT.h"
+#include "ember/commnication/configrator.h"
 #include "ember/keyboard/config.h"
 #include "ember/keyboard/keyboard.h"
 #include "ember/module/cd4051b.h"
@@ -47,46 +48,13 @@ void setup() {
   tusb_init();
   // Start Timer
   HAL_TIM_Base_Start_IT(&htim17);
+  // Start Configurator
+  ember::Configurator::GetInstance()->Init();
 
   SEGGER_RTT_printf(0, "Ember startup.\n");
 }
 
-void loop() {
-  tud_task();
-
-  // USB CDC Echoback Test
-  int available_bytes = tud_cdc_available();
-  if (available_bytes != 0) {
-    char* buf = new char[available_bytes];
-    uint32_t count =
-        tud_cdc_read(reinterpret_cast<uint8_t*>(buf), available_bytes);
-    tud_cdc_write(reinterpret_cast<uint8_t*>(buf), count);
-    tud_cdc_write_flush();
-
-    switch (buf[0]) {
-      case 'c':
-        SEGGER_RTT_printf(0, "Start calibrate\n");
-        keyboard->StartCalibrate();
-        break;
-      case 's':
-        SEGGER_RTT_printf(0, "Stop calibrate\n");
-        // Print calibration result
-        for (int i = 0; i < 32; i++) {
-          ember::KeySwitchConfig config =
-              keyboard->key_switches_[i]->GetConfig();
-          SEGGER_RTT_printf(0, "Key %d: %d~%d\n", i, config.max_value,
-                            config.min_value);
-        }
-        keyboard->StopCalibrate();
-        ember::Flash::SaveConfig(keyboard->GetConfig());
-        break;
-      default:
-        break;
-    }
-
-    delete[] buf;
-  }
-}
+void loop() { tud_task(); }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
   if (htim == &htim17) {
