@@ -49,6 +49,8 @@ void setup() {
   // Start Timer
   HAL_TIM_Base_Start_IT(&htim17);
   // Start Configurator
+  ember::Configurator::GetInstance()->SetKeyboard(keyboard);
+  ember::Configurator::GetInstance()->SetConfig(&config);
   ember::Configurator::GetInstance()->Init();
 
   SEGGER_RTT_printf(0, "Ember startup.\n");
