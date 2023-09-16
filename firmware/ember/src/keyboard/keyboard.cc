@@ -1,7 +1,7 @@
 #include "ember/keyboard/keyboard.h"
 
 namespace ember {
-Keyboard::Keyboard(Config config) : config_(config) {
+Keyboard::Keyboard(Config& config) : config_(config) {
   for (int i = 0; i < 32; i++) {
     switch (config_.key_switch_configs[i].key_type) {
       case 0:
