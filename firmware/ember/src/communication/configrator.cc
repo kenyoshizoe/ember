@@ -37,7 +37,7 @@ void Configurator::Task() {
   // Check Address
   if (func_code == 0) {
     // Read
-    uint32_t response_length = 5 + length;
+    uint32_t response_length = 4 + length;
     uint8_t* response = new uint8_t[response_length];
     response[0] = 0x01;
     response[1] = address >> 8;
@@ -75,9 +75,11 @@ void Configurator::Task() {
 
     // Send Response
     uint32_t encoded_length = COBS::getEncodedBufferSize(response_length);
-    uint8_t* encoded_buf = new uint8_t[encoded_length];
+    uint8_t* encoded_buf = new uint8_t[encoded_length + 1];
     COBS::encode(response, response_length, encoded_buf);
-    tud_cdc_write(encoded_buf, encoded_length);
+    encoded_buf[encoded_length] = 0x00;
+    tud_cdc_write(encoded_buf, encoded_length + 1);
+    tud_cdc_write_flush();
 
     delete encoded_buf;
     delete response;
@@ -142,9 +144,11 @@ void Configurator::Task() {
 
     // Send Response
     uint32_t encoded_length = COBS::getEncodedBufferSize(4);
-    uint8_t* encoded_buf = new uint8_t[encoded_length];
+    uint8_t* encoded_buf = new uint8_t[encoded_length + 1];
     COBS::encode(response, 4, encoded_buf);
-    tud_cdc_write(encoded_buf, encoded_length);
+    encoded_buf[encoded_length] = 0x00;
+    tud_cdc_write(encoded_buf, encoded_length + 1);
+    tud_cdc_write_flush();
 
     delete encoded_buf;
     delete response;
