@@ -17,7 +17,7 @@ struct KeySwitchConfig {
    */
   uint8_t key_type = 0;
   // actuation point in 0.1mm unit
-  uint8_t actuation_point = 3;
+  uint8_t actuation_point = 10;
   // RappidTrigger Settings
   // 最も深く押したときの位置からどれだけ離れたらトリガーを解除するか。0.1mm単位。
   // How far away from the deepest position to release the trigger. 0.1mm unit.
@@ -41,8 +41,8 @@ struct KeySwitchCalibrationData {
  * @note 288 bytes
  */
 struct Config {
-  KeySwitchConfig key_switch_configs[32];
-  KeySwitchCalibrationData key_switch_calibration_data[32];
+  KeySwitchConfig key_switch_configs[32]; // 160 bytes
+  KeySwitchCalibrationData key_switch_calibration_data[32]; // 128 bytes
 } __attribute__((packed));
 }  // namespace ember
 
