@@ -62,10 +62,11 @@ Send these query with encoding/decoding with COBS.
 | ...           | ...                              | ... |
 | 0x2030        | Key47 Push distance              | R   |
 | 0x2031-0x2FFF | Reserved                         | -   |
-| 0x3000        | Calibration (1=Enable 0=Disable) | W   |
-| 0x3001        | Reset Config to default          | W   |
-| 0x3002        | Reset MCU                        | W   |
-| 0x3003        | Enter DFU (1=Enable 0=Disable)   | W   |
+| 0x3000        | Save Config                      | W   |
+| 0x3001        | Calibration (0=Disable 1=Enable) | W   |
+| 0x3002        | Reset Config to default          | W   |
+| 0x3003        | Reset MCU                        | W   |
+| 0x3004        | Enter DFU                        | W   |
 
 それぞれのキーの設定は次のようになっています。
 Each key config is as follows:

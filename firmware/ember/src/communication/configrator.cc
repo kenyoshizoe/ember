@@ -114,6 +114,9 @@ void Configurator::Task() {
       for (int i = 0; i < length; i++) {
         switch (address + i) {
           case 0x3000:
+            // Save Config
+            Flash::SaveConfig(*config_);
+          case 0x3001:
             // Calibration
             if (data[i] == 0x00) {
               // Stop Calibration
@@ -125,16 +128,16 @@ void Configurator::Task() {
               response[0] = 0x00;
             }
             break;
-          case 0x3001:
+          case 0x3002:
             // Reset config to default
             *config_ = Flash::GetDefaultConfig();
             response[0] = 0x00;
             break;
-          case 0x3002:
+          case 0x3003:
             // Reset MCU
             HAL_NVIC_SystemReset();
             break;
-          case 0x3003:
+          case 0x3004:
             // Enter DFU Mode
             // TODO: Implement
             break;
