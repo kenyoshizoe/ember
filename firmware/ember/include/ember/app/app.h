@@ -11,6 +11,7 @@ extern "C" {
 #include "tusb.h"
 #include "tusb_config.h"
 
+void usb_bootloader_init(void);
 void setup(void);
 void loop(void);
 

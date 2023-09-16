@@ -22,6 +22,36 @@ uint16_t adc_val[4];
 bool adc12_running = false;
 bool adc34_running = false;
 
+uint8_t switchToBootloader __attribute__((section(".noinit")));
+
+void usb_bootloader_init() {
+  // Check if we need to jump to the bootloader
+  if (switchToBootloader == 0x11) {
+    void (*SysMemBootJump)(void);
+    switchToBootloader =
+        0x00;  // Reset the variable to prevent being stuck in the bootloader
+               // (since a device reset wont change it)
+    volatile uint32_t addr =
+        0x1FFFD800;  // The STM32G431KB system memory start address
+    SysMemBootJump = (void (*)(void))(
+        *((uint32_t*)(addr +
+                      4)));  // Point the PC to the System Memory reset vector
+
+    HAL_RCC_DeInit();   // Reset the system clock
+    SysTick->CTRL = 0;  // Reset the  SysTick Timer
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+
+    __set_MSP(*(uint32_t*)addr);  // Set the Main Stack Pointer
+
+    SysMemBootJump();  // Run our virtual function defined above that sets the
+                       // PC
+
+    while (1)
+      ;
+  }
+}
+
 void setup() {
   SEGGER_RTT_Init();
   // Load Config

@@ -4,6 +4,8 @@
 #include "ember/keyboard/config.h"
 #include "ember/keyboard/keyboard.h"
 
+extern uint8_t switchToBootloader __attribute__((section(".noinit")));
+
 namespace ember {
 class Configurator {
  public:

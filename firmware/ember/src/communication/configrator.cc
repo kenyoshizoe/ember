@@ -109,8 +109,8 @@ void Configurator::Task() {
     }
 
     // Device Control
-    if (0x3000 <= address && address <= 0x3003 &&
-        address + length - 1 <= 0x3003) {
+    if (0x3000 <= address && address <= 0x3004 &&
+        address + length - 1 <= 0x3004) {
       for (int i = 0; i < length; i++) {
         switch (address + i) {
           case 0x3000:
@@ -139,7 +139,8 @@ void Configurator::Task() {
             break;
           case 0x3004:
             // Enter DFU Mode
-            // TODO: Implement
+            switchToBootloader = 0x11;
+            NVIC_SystemReset();
             break;
         }
       }
