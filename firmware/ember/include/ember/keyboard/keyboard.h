@@ -11,7 +11,7 @@
 namespace ember {
 class Keyboard {
  public:
-  Keyboard(Config config);
+  Keyboard(Config& config);
 
   /**
    * @brief Send a HID report to the host.
@@ -30,7 +30,7 @@ class Keyboard {
 
  private:
   static int8_t ChToIndex(uint8_t adc_ch, uint8_t amux_channel);
-  Config config_;
+  Config& config_;
 };
 }  // namespace ember
 

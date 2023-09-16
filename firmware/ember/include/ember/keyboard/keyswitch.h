@@ -11,7 +11,7 @@ class KeySwitchBase {
   using Config = KeySwitchConfig;
   using CalibrationData = KeySwitchCalibrationData;
 
-  KeySwitchBase(Config& config, CalibrationData calibration_data)
+  KeySwitchBase(Config& config, CalibrationData& calibration_data)
       : config_(config), calibration_data_(calibration_data) {}
 
   /**
@@ -44,6 +44,10 @@ class KeySwitchBase {
    * @brief Get the config.
    */
   Config& GetConfig() { return config_; }
+  /**
+   * @brief Get the calibration data.
+   */
+  CalibrationData& GetCalibrationData() { return calibration_data_; }
   /**
    * @brief Get the last position in 0.1mm.
    */
