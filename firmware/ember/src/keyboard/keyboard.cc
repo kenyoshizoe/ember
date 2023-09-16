@@ -1,17 +1,23 @@
 #include "ember/keyboard/keyboard.h"
 
 namespace ember {
-Keyboard::Keyboard(Config config) : config_(config) {
+Keyboard::Keyboard(Config& config) : config_(config) {
   for (int i = 0; i < 32; i++) {
     switch (config_.key_switch_configs[i].key_type) {
       case 0:
-        key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i]);
+        key_switches_[i] =
+            new ThresholdKey(config_.key_switch_configs[i],
+                             config_.key_switch_calibration_data[i]);
         break;
       case 1:
-        key_switches_[i] = new RapidTriggerKey(config_.key_switch_configs[i]);
+        key_switches_[i] =
+            new RapidTriggerKey(config_.key_switch_configs[i],
+                                config_.key_switch_calibration_data[i]);
         break;
       default:
-        key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i]);
+        key_switches_[i] =
+            new ThresholdKey(config_.key_switch_configs[i],
+                             config_.key_switch_calibration_data[i]);
         break;
     }
   }
@@ -68,7 +74,7 @@ int8_t Keyboard::ChToIndex(uint8_t adc_ch, uint8_t amux_channel) {
   switch (adc_ch) {
     case 0:
       switch (amux_channel) {
-        case 0: 
+        case 0:
           return 31;
         case 1:
           return 30;

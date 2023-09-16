@@ -9,10 +9,12 @@ CD4051B::CD4051B(GPIO_TypeDef* gpio_a_port, uint16_t gpio_a_pin,
       gpio_b_port_(gpio_b_port),
       gpio_b_pin_(gpio_b_pin),
       gpio_c_port_(gpio_c_port),
-      gpio_c_pin_(gpio_c_pin) {
-  HAL_GPIO_WritePin(gpio_a_port, gpio_a_pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(gpio_b_port, gpio_b_pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(gpio_c_port, gpio_c_pin, GPIO_PIN_RESET);
+      gpio_c_pin_(gpio_c_pin) {}
+
+void CD4051B::Init() {
+  HAL_GPIO_WritePin(gpio_a_port_, gpio_a_pin_, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(gpio_b_port_, gpio_b_pin_, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(gpio_c_port_, gpio_c_pin_, GPIO_PIN_RESET);
 }
 
 void CD4051B::SetCh(uint8_t ch) {
@@ -25,6 +27,7 @@ void CD4051B::SetCh(uint8_t ch) {
   HAL_GPIO_WritePin(gpio_c_port_, gpio_c_pin_,
                     (ch & 0b00000100) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
+
 void CD4051B::NextCh() {
   ch_ = (ch_ + 1) % 8;
   SetCh(ch_);
