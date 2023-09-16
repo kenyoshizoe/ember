@@ -2,6 +2,23 @@
 ## Overview
 48Key Hall Effect Keyboard for Gaming.
 
+## PCB
+pcb/ember
+
+基板はKiCAD7で制作され、USBコネクタを除く全てのパーツはJLCPCBのPCBAサービスで実装することができます。
+TypeCコネクタは[5077CR-16-SMC2-BK-TR](https://akizukidenshi.com/catalog/g/gC-14356/)を用いることができます。
+
+pcb was designed with KiCAD 7.
+All of components except USB Connector is available at jlcpcb pcba service.
+
+![](doc/ember_top.png)
+![](doc/ember_bottom.png)
+
+## Case
+pcb/ember_bottom_plate, pcb/ember_top_plate
+![](doc/ember.jpg)
+
+
 ## Communication
 このキーボードはHID&CDC複合デバイスとして認識されます。
 各種設定はCDCから行うことができます。
