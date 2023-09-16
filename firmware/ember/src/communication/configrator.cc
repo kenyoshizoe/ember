@@ -44,8 +44,8 @@ void Configurator::Task() {
     response[2] = address & 0xFF;
     response[3] = length;
 
-    if (0x0000 <= address && address <= 0x0120 &&
-        address + length - 1 <= 0x0120) {
+    if (0x0000 <= address && address < sizeof(config_->key_switch_configs) &&
+        address + length - 1 < sizeof(config_->key_switch_configs)) {
       // Key Settings
       response[0] = 0x00;
       memcpy(response + 4,
@@ -53,8 +53,10 @@ void Configurator::Task() {
              length);
     }
 
-    if (0x1000 <= address && address <= 0x107F &&
-        address + length - 1 <= 0x107F) {
+    if (0x1000 <= address &&
+        address < 0x1000 + sizeof(config_->key_switch_calibration_data) &&
+        address + length - 1 <
+            0x1000 + sizeof(config_->key_switch_calibration_data)) {
       // Calibration Data
       response[0] = 0x00;
       memcpy(response + 4,
@@ -63,8 +65,8 @@ void Configurator::Task() {
              length);
     }
 
-    if (0x2000 <= address && address <= 0x2030 &&
-        address + length - 1 <= 0x2030) {
+    if (0x2000 <= address && address < 0x2000 + 32 &&
+        address + length - 1 < 0x2000 + 32) {
       // Push Distance
       response[0] = 0x00;
       for (int i = 0; i < length; i++) {

@@ -13,8 +13,7 @@ def ember_write(ser: serial.Serial, address, data):
     ser.write(write_query)
     ser.flush()
     response = cobs.decode(ser.read_until(b'\x00')[:-1])
-    return response[0]
-
+    return response[0] == 0
 
 def ember_read(ser: serial.Serial, address, len):
     read_query = []
@@ -26,4 +25,10 @@ def ember_read(ser: serial.Serial, address, len):
     ser.write(read_query)
     ser.flush()
     response = cobs.decode(ser.read_until(b'\x00')[:-1])
+    if response[0] != 0:
+        return None
+    if response[1] << 8 | response[2] != address:
+        return None
+    if response[3] != len:
+        return None
     return response[4:]
