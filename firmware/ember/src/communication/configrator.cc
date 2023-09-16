@@ -40,7 +40,7 @@ void Configurator::Task() {
       // Key Settings
       response[0] = 0x00;
       memcpy(response + 4,
-             reinterpret_cast<uint8_t*>(&config_->key_switch_configs + address),
+             reinterpret_cast<uint8_t*>(&config_->key_switch_configs) + address,
              length);
     }
 
@@ -49,8 +49,8 @@ void Configurator::Task() {
       // Calibration Data
       response[0] = 0x00;
       memcpy(response + 4,
-             reinterpret_cast<uint8_t*>(&config_->key_switch_calibration_data +
-                                        address - 0x1000),
+             reinterpret_cast<uint8_t*>(&config_->key_switch_calibration_data) +
+                 address - 0x1000,
              length);
     }
 
@@ -84,9 +84,8 @@ void Configurator::Task() {
     // Key Settings
     if (0x0000 <= address && address <= 0x0120 &&
         address + length - 1 <= 0x0120) {
-      memcpy(data,
-             reinterpret_cast<uint8_t*>(&config_->key_switch_configs + address),
-             length);
+      memcpy(reinterpret_cast<uint8_t*>(&config_->key_switch_configs) + address,
+             data, length);
       response[0] = 0x00;
     }
 
