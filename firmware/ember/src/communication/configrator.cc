@@ -18,7 +18,16 @@ void Configurator::Task() {
   // COBS Decode
   uint8_t* decoded_buf = new uint8_t[buf_length];
   size_t decoded_length = COBS::decode(buf, buf_length, decoded_buf);
+  decoded_length -= 1;  // Remove Delimiter
   delete buf;
+
+  if (decoded_length < 4) {
+    delete decoded_buf;
+    uint8_t response[] = {0x01, 0x00};
+    tud_cdc_write(&response, 2);
+    tud_cdc_write_flush();
+    return;
+  }
 
   // Parse
   uint8_t func_code = decoded_buf[0];
@@ -73,6 +82,14 @@ void Configurator::Task() {
     delete encoded_buf;
     delete response;
   } else if (func_code == 1) {
+    if (decoded_length != length + 4) {
+      // Invalid Length
+      uint8_t response[2] = {0x01, 0x00};
+      tud_cdc_write(response, 2);
+      tud_cdc_write_flush();
+      return;
+    }
+
     // Write
     uint8_t* response = new uint8_t[4];
     response[0] = 0x01;
