@@ -98,7 +98,7 @@ void Configurator::Task() {
     response[1] = address >> 8;
     response[2] = address & 0xFF;
     response[3] = length;
-    uint8_t* data = buf + 5;
+    uint8_t* data = decoded_buf + 4;
 
     // Key Settings
     if (0x0000 <= address && address <= 0x0120 &&
