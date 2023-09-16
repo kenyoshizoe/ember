@@ -1,6 +1,6 @@
 # Ember
 ## Overview
-48Key Hall Effect Keyboard for Gaming.
+32Key Hall Effect Keyboard for Gaming.
 
 ## PCB
 pcb/ember
@@ -65,25 +65,26 @@ Send these query with encoding/decoding with COBS.
 | ------------- | -------------------------------- | --- |
 | 0x0000-0x0004 | Key0 Config                      | W/R |
 | 0x0005-0x0009 | Key1 Config                      | W/R |
-| 0x0012-0x001A | Key2 Config                      | W/R |
+| 0x000A-0x000E | Key2 Config                      | W/R |
 | ...           | ...                              | ... |
-| 0x0117-0x0120 | Key47 Config                     | W/R |
-| 0x0121-0x0FFF | Reserved                         | -   |
+| 0x009B-0x009F | Key31 Config                     | W/R |
+| 0x00A0-0x0FFF | Reserved                         | -   |
 | 0x1000-0x1003 | Key0 Calibaration Data           | R   |
 | 0x1004-0x1007 | Key1 Calibaration Data           | R   |
 | ...           | ...                              | ... |
-| 0x107C-0x107F | Key47 Calibration Data           | R   |
+| 0x107B-0x107F | Key31 Calibration Data           | R   |
 | 0x1080-0x1FFF | Reserved                         | -   |
 | 0x2000        | Key0 Push distance               | R   |
 | 0x2001        | Key1 Push distance               | R   |
 | ...           | ...                              | ... |
-| 0x2030        | Key47 Push distance              | R   |
-| 0x2031-0x2FFF | Reserved                         | -   |
+| 0x201F        | Key31 Push distance              | R   |
+| 0x2020-0x2FFF | Reserved                         | -   |
 | 0x3000        | Save Config                      | W   |
 | 0x3001        | Calibration (0=Disable 1=Enable) | W   |
 | 0x3002        | Reset Config to default          | W   |
 | 0x3003        | Reset MCU                        | W   |
 | 0x3004        | Enter DFU                        | W   |
+| 0x3005-0xFFFF | Reserved                         | -   |
 
 それぞれのキーの設定は次のようになっています。
 Each key config is as follows:
