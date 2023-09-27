@@ -2,5 +2,6 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "files.autoSave": "onFocusChange",
-  "prettier.configPath": "ember-web-configurator/.prettierrc.json"
+  "prettier.configPath": "ember-web-configurator/.prettierrc.json",
+  "prettier.ignorePath": "ember-web-configurator/.prettierignore"
 }
