@@ -76,7 +76,6 @@ export default function Home() {
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
   const [keySettings, setKeySettings] = useState<Record<number, KeySettings>>({});
   const [keyMappings, setKeyMappings] = useState<Map<number, number>>(new Map());
-  const [isLoadingKeyMappings, setIsLoadingKeyMappings] = useState(false);
   const [currentDistance, setCurrentDistance] = useState<number | null>(null);
   const [distanceUpdateTick, setDistanceUpdateTick] = useState(0);
   const stopMonitoringRef = useRef<(() => void) | null>(null);
@@ -85,6 +84,7 @@ export default function Home() {
   const [keyMappingError, setKeyMappingError] = useState<{ keyId: number | null; message: string | null }>({ keyId: null, message: null });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isResettingSettings, setIsResettingSettings] = useState(false);
+  const [isEnteringDfu, setIsEnteringDfu] = useState(false);
   
   const { 
     isSupported, 
@@ -106,21 +106,19 @@ export default function Home() {
     startCalibration,
     stopCalibration,
     readKeySwitchConfig,
-    writeKeySwitchConfig
+    writeKeySwitchConfig,
+    enterDfuMode
   } = useKeyboard();
 
   const loadKeyMappings = useCallback(async () => {
     if (!isConnected) return;
     
-    setIsLoadingKeyMappings(true);
     try {
       const mappings = await readAllKeyMappings();
       setKeyMappings(mappings);
       console.log('Loaded key mappings:', mappings);
     } catch (error) {
       console.error('Failed to load key mappings:', error);
-    } finally {
-      setIsLoadingKeyMappings(false);
     }
   }, [isConnected, readAllKeyMappings]);
 
@@ -339,6 +337,25 @@ export default function Home() {
       setIsResettingSettings(false);
     }
   }, [buildDefaultKeySettings, isConnected, loadKeyMappings, refreshKeySettingsFromDevice, resetConfiguration]);
+
+  const handleEnterDfuMode = useCallback(async () => {
+    if (!isConnected) {
+      console.warn('Cannot enter DFU mode while the keyboard is disconnected.');
+      return;
+    }
+
+    setIsEnteringDfu(true);
+    try {
+      const success = await enterDfuMode();
+      if (!success) {
+        console.error('Failed to enter DFU mode.');
+      }
+    } catch (error) {
+      console.error('Error while trying to enter DFU mode:', error);
+    } finally {
+      setIsEnteringDfu(false);
+    }
+  }, [enterDfuMode, isConnected]);
 
   // Auto-start monitoring when key is selected
   useEffect(() => {
@@ -641,24 +658,6 @@ export default function Home() {
                 <div className="bg-white rounded-lg p-4 shadow-sm mt-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Control Panel</h4>
                   <div className="grid grid-cols-1 gap-3">
-                    {/* Refresh Key Mappings */}
-                    <button
-                      onClick={loadKeyMappings}
-                      disabled={isLoadingKeyMappings}
-                      className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isLoadingKeyMappings
-                          ? 'bg-gray-400 text-white cursor-not-allowed'
-                          : 'bg-green-600 hover:bg-green-700 text-white'
-                      }`}
-                    >
-                      <span className={`${isLoadingKeyMappings ? 'animate-spin' : ''}`}>
-                        🔄
-                      </span>
-                      <span>
-                        {isLoadingKeyMappings ? 'Loading...' : 'Refresh Key Mappings'}
-                      </span>
-                    </button>
-
                     {/* Calibration Controls */}
                     <div className="flex space-x-2">
                       <button
@@ -712,19 +711,34 @@ export default function Home() {
                         <span>{isSavingSettings ? '⏳' : '💾'}</span>
                         <span>{isSavingSettings ? 'Saving All Settings...' : 'Save Settings'}</span>
                       </button>
-                      
-                      <button
-                        onClick={handleResetAllSettings}
-                        className={`w-full py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
-                          isResettingSettings
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-gray-600 hover:bg-gray-700 text-white'
-                        }`}
-                        disabled={isResettingSettings}
-                      >
-                        <span>{isResettingSettings ? '⏳' : '♻️'}</span>
-                        <span>{isResettingSettings ? 'Resetting...' : 'Reset to Default'}</span>
-                      </button>
+
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={handleResetAllSettings}
+                          className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                            isResettingSettings
+                              ? 'bg-gray-400 text-white cursor-not-allowed'
+                              : 'bg-gray-600 hover:bg-gray-700 text-white'
+                          }`}
+                          disabled={isResettingSettings}
+                        >
+                          <span>{isResettingSettings ? '⏳' : '♻️'}</span>
+                          <span>{isResettingSettings ? 'Resetting...' : 'Reset to Default'}</span>
+                        </button>
+
+                        <button
+                          onClick={handleEnterDfuMode}
+                          className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                            isEnteringDfu || !isConnected
+                              ? 'bg-gray-400 text-white cursor-not-allowed'
+                              : 'bg-gray-600 hover:bg-gray-700 text-white'
+                          }`}
+                          disabled={isEnteringDfu || !isConnected}
+                        >
+                          <span>{isEnteringDfu ? '⏳' : '🚀'}</span>
+                          <span>{isEnteringDfu ? 'Entering DFU...' : 'Enter DFU Mode'}</span>
+                        </button>
+                      </div>
 
                       {!isConnected && (
                         <p className="text-xs text-gray-500">
