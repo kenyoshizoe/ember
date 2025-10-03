@@ -43,6 +43,7 @@ export interface UseKeyboardReturn extends KeyboardState {
   // Calibration
   startCalibration: () => Promise<boolean>;
   stopCalibration: () => Promise<boolean>;
+  enterDfuMode: () => Promise<boolean>;
 }
 
 export function useKeyboard(): UseKeyboardReturn {
@@ -370,6 +371,19 @@ export function useKeyboard(): UseKeyboardReturn {
     }
   }, []);
 
+  const enterDfuModeCallback = useCallback(async (): Promise<boolean> => {
+    if (!protocolRef.current) {
+      throw new Error('No protocol instance available');
+    }
+    try {
+      const response = await protocolRef.current.writeQuery(0x3004, new Uint8Array([0]));
+      return response.success;
+    } catch (error) {
+      console.error('Failed to enter DFU mode:', error);
+      return false;
+    }
+  }, []);
+
   return {
     ...state,
     connect,
@@ -388,5 +402,6 @@ export function useKeyboard(): UseKeyboardReturn {
     readKeyPushDistance: readKeyPushDistanceCallback,
     startCalibration: startCalibrationCallback,
     stopCalibration: stopCalibrationCallback,
+    enterDfuMode: enterDfuModeCallback,
   };
 }
