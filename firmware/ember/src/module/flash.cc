@@ -47,10 +47,11 @@ bool Flash::LoadConfig(Config& config) {
 Config Flash::GetDefaultConfig() {
   Config default_config;
   uint8_t default_key_map_[32] = {
-      KC_ESCAPE, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6,         KC_7,
-      KC_TAB,    KC_Q, KC_W, KC_E, KC_R, KC_T, KC_8,         KC_LEFT_SHIFT,
-      KC_A,      KC_S, KC_D, KC_F, KC_G, KC_M, KC_LEFT_CTRL, KC_Z,
-      KC_X,      KC_C, KC_V, KC_H, KC_N, KC_B, KC_LEFT_ALT,  KC_SPACE};
+      KC_ESCAPE, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6,
+      KC_7, KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, 
+      KC_8, KC_LEFT_SHIFT, KC_A, KC_S, KC_D, KC_F, KC_G,
+      KC_M, KC_LEFT_CTRL, KC_Z, KC_X, KC_C, KC_V,
+      KC_H, KC_N, KC_B, KC_LEFT_ALT, KC_SPACE};
   for (int i = 0; i < 32; i++) {
     default_config.key_switch_configs[i].key_code = default_key_map_[i];
   }
