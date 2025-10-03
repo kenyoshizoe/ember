@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for Ember Web Configurator */
+:root {
+  --ember-primary: #3b82f6; /* Blue */
+  --ember-secondary: #64748b; /* Slate */
+  --ember-accent: #f59e0b; /* Amber */
+  --ember-success: #10b981; /* Emerald */
+  --ember-error: #ef4444; /* Red */
+  --ember-warning: #f59e0b; /* Amber */
+  --ember-bg: #f8fafc; /* Slate 50 */
+  --ember-surface: #ffffff;
+  --ember-text: #1e293b; /* Slate 800 */
+  --ember-text-muted: #64748b; /* Slate 500 */
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  color: var(--ember-text);
+  background-color: var(--ember-bg);
+}
+
+/* Custom utilities */
+.ember-shadow {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.ember-shadow-lg {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
