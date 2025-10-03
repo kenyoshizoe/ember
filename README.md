@@ -11,7 +11,7 @@ Meet Ember’s control room in the browser. The Next.js‑powered configurator l
 - Fire off calibration, DFU, and other maintenance commands in a single click
 
 Launch (Chrome / Edge recommended):
-https://ember-5boxr6uwv-kenyoshizoes-projects.vercel.app/
+https://ember-five-blond.vercel.app/
 
 ## PCB
 pcb/ember
