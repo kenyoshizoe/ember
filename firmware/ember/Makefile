@@ -199,6 +199,12 @@ CFLAGS += \
 -Wno-error=unused-parameter
 
 #######################################
+# ETL
+#######################################
+C_INCLUDES += \
+-I lib/etl/include
+
+#######################################
 # build the application
 #######################################
 # list of objects

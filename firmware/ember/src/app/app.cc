@@ -75,7 +75,13 @@ void setup() {
   HAL_ADCEx_MultiModeStart_DMA(&hadc3, reinterpret_cast<uint32_t*>(adc_val + 2),
                                1);
   // TinyUSB init
-  tusb_init();
+
+  tusb_rhport_init_t dev_init = {
+    .role = TUSB_ROLE_DEVICE,
+    .speed = TUSB_SPEED_AUTO
+  };
+  tusb_init(0, &dev_init); // initialize device stack on roothub port 0
+
   // Start Timer
   HAL_TIM_Base_Start_IT(&htim17);
   // Start Configurator

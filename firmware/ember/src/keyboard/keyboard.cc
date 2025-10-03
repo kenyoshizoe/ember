@@ -29,6 +29,19 @@ void Keyboard::Update() {
   uint8_t key_codes_count = 0;
 
   for (int i = 0; i < 32; i++) {
+    // 型チェックと再生成
+    if (config_.key_switch_configs[i].key_type == 0) {
+      if (dynamic_cast<ThresholdKey*>(key_switches_[i]) == nullptr) {
+        delete key_switches_[i];
+        key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i], config_.key_switch_calibration_data[i]);
+      }
+    } else if (config_.key_switch_configs[i].key_type == 1) {
+      if (dynamic_cast<RapidTriggerKey*>(key_switches_[i]) == nullptr) {
+        delete key_switches_[i];
+        key_switches_[i] = new RapidTriggerKey(config_.key_switch_configs[i], config_.key_switch_calibration_data[i]);
+      }
+    }
+
     if (key_switches_[i]->IsPressed()) {
       uint8_t key_code = key_switches_[i]->GetKeyCode();
       if (key_code < 0xE0) {

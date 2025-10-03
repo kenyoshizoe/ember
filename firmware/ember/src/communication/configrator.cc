@@ -3,28 +3,45 @@
 #include "ember/module/flash.h"
 #include "ember/utils/cobs.h"
 
+#include "tusb.h"
+
 namespace ember {
 void Configurator::Init() {
-  // Set Delimiter
-  tud_cdc_set_wanted_char(0x00);
 }
 
 void Configurator::Task() {
-  // Read
-  uint32_t buf_length = tud_cdc_available();
-  uint8_t* buf = new uint8_t[buf_length];
-  tud_cdc_read(buf, buf_length);
+  // 1文字ずつ読み取り、リングバッファに追加
+  while (tud_cdc_available()) {
+    uint8_t c;
+    if (tud_cdc_read(&c, 1) == 1) {
+      if (c == 0x00) {
+        ProcessCompleteMessage();
+      } else {
+        if (rx_queue_.full())
+          rx_queue_.pop();
+        rx_queue_.push(c);
+      }
+    }
+  }
+}
 
+void Configurator::ProcessCompleteMessage() {
+  // リングバッファからメッセージを取得
+  uint8_t buf[kBufSize];
+  uint8_t decoded_buf[kBufSize];
+
+  size_t write_index = 0;
+  while (!rx_queue_.empty() && write_index < kBufSize) {
+    buf[write_index] = rx_queue_.front();
+    rx_queue_.pop();
+    write_index++;
+  }
+  
   // COBS Decode
-  uint8_t* decoded_buf = new uint8_t[buf_length];
-  size_t decoded_length = COBS::decode(buf, buf_length, decoded_buf);
-  decoded_length -= 1;  // Remove Delimiter
-  delete buf;
-
+  size_t decoded_length = COBS::decode(buf, write_index, decoded_buf); // デリミタを除く
   if (decoded_length < 4) {
-    delete decoded_buf;
-    uint8_t response[] = {0x01, 0x00};
-    tud_cdc_write(&response, 2);
+    uint8_t response[] = {0x01, 0x00, 0x00, 0x00};
+    tud_cdc_write(response, 4);
     tud_cdc_write_flush();
     return;
   }
@@ -34,11 +51,19 @@ void Configurator::Task() {
   uint16_t address = decoded_buf[1] << 8 | decoded_buf[2];
   uint8_t length = decoded_buf[3];
 
-  // Check Address
-  if (func_code == 0) {
-    // Read
+  if (func_code == 0) { // Read
     uint32_t response_length = 4 + length;
-    uint8_t* response = new uint8_t[response_length];
+    
+    // 最大レスポンスサイズを制限
+    static constexpr uint32_t MAX_RESPONSE_SIZE = 512;
+    if (response_length > MAX_RESPONSE_SIZE) {
+      uint8_t response[] = {0x01, 0x00, 0x00, 0x00};
+      tud_cdc_write(response, 4);
+      tud_cdc_write_flush();
+      return;
+    }
+
+    uint8_t response[kBufSize];
     response[0] = 0x01;
     response[1] = address >> 8;
     response[2] = address & 0xFF;
@@ -61,7 +86,7 @@ void Configurator::Task() {
       response[0] = 0x00;
       memcpy(response + 4,
              reinterpret_cast<uint8_t*>(&config_->key_switch_calibration_data) +
-                 address - 0x1000,
+                 (address - 0x1000),
              length);
     }
 
@@ -71,20 +96,18 @@ void Configurator::Task() {
       response[0] = 0x00;
       for (int i = 0; i < length; i++) {
         response[4 + i] =
-            keyboard_->key_switches_[address - 0x2000 + i]->GetLastPosition();
+            keyboard_->key_switches_[(address - 0x2000) + i]->GetLastPosition();
       }
     }
 
     // Send Response
     uint32_t encoded_length = COBS::getEncodedBufferSize(response_length);
-    uint8_t* encoded_buf = new uint8_t[encoded_length + 1];
+    uint8_t encoded_buf[kBufSize + 256]; // COBSエンコード用の追加バッファ
     COBS::encode(response, response_length, encoded_buf);
     encoded_buf[encoded_length] = 0x00;
+
     tud_cdc_write(encoded_buf, encoded_length + 1);
     tud_cdc_write_flush();
-
-    delete encoded_buf;
-    delete response;
   } else if (func_code == 1) {
     if (decoded_length != length + 4) {
       // Invalid Length
@@ -95,7 +118,7 @@ void Configurator::Task() {
     }
 
     // Write
-    uint8_t* response = new uint8_t[4];
+    uint8_t response[4];
     response[0] = 0x01;
     response[1] = address >> 8;
     response[2] = address & 0xFF;
@@ -118,6 +141,8 @@ void Configurator::Task() {
           case 0x3000:
             // Save Config
             Flash::SaveConfig(*config_);
+            response[0] = 0x00;
+            break;
           case 0x3001:
             // Calibration
             if (data[i] == 0x00) {
@@ -150,21 +175,16 @@ void Configurator::Task() {
 
     // Send Response
     uint32_t encoded_length = COBS::getEncodedBufferSize(4);
-    uint8_t* encoded_buf = new uint8_t[encoded_length + 1];
+    uint8_t encoded_buf[256]; // COBSエンコード用バッファ（4バイト + エンコード用余裕）
     COBS::encode(response, 4, encoded_buf);
     encoded_buf[encoded_length] = 0x00;
     tud_cdc_write(encoded_buf, encoded_length + 1);
     tud_cdc_write_flush();
-
-    delete encoded_buf;
-    delete response;
   }
-
-  delete decoded_buf;
 }
 }  // namespace ember
 
 // TinyUSB Callbacks
-void tud_cdc_rx_wanted_cb(uint8_t itf, char wanted_char) {
+void tud_cdc_rx_cb(uint8_t itf) {
   ember::Configurator::GetInstance()->Task();
 }
