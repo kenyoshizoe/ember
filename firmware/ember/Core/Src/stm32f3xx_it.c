@@ -243,7 +243,8 @@ void ADC1_2_IRQHandler(void)
 void USB_HP_CAN_TX_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_HP_CAN_TX_IRQn 0 */
-  tud_int_handler(0);
+  tusb_int_handler(0, true);
+  // tud_int_handler(0);
   return;
   /* USER CODE END USB_HP_CAN_TX_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_FS);
@@ -258,7 +259,8 @@ void USB_HP_CAN_TX_IRQHandler(void)
 void USB_LP_CAN_RX0_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 0 */
-  tud_int_handler(0);
+  tusb_int_handler(0, true);
+  // tud_int_handler(0);
   return;
   /* USER CODE END USB_LP_CAN_RX0_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_FS);
