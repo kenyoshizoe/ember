@@ -1,9 +1,12 @@
 # Ember
 ## Overview
 32Key Hall Effect Keyboard for Gaming.
+
 ![](doc/ember.jpg)
 
 ## Web Configuration Tool
+![](doc/web_configurator.png)
+
 Meet Ember’s control room in the browser. The Next.js‑powered configurator lets you:
 
 - Configuring keymaps with instant write-backs over Web Serial
