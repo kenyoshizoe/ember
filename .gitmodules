@@ -1,3 +1,6 @@
 [submodule "firmware/ember/lib/tinyusb"]
 	path = firmware/ember/lib/tinyusb
 	url = git@github.com:hathach/tinyusb.git
+[submodule "firmware/ember/lib/etl"]
+	path = firmware/ember/lib/etl
+	url = https://github.com/ETLCPP/etl.git
