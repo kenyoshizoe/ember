@@ -1,6 +1,17 @@
 # Ember
 ## Overview
 32Key Hall Effect Keyboard for Gaming.
+![](doc/ember.jpg)
+
+## Web Configuration Tool
+Meet Ember’s control room in the browser. The Next.js‑powered configurator lets you:
+
+- Configuring keymaps with instant write-backs over Web Serial
+- Watch real-time hall-effect telemetry and dial in rapid trigger thresholds
+- Fire off calibration, DFU, and other maintenance commands in a single click
+
+Launch (Chrome / Edge recommended):
+https://ember-5boxr6uwv-kenyoshizoes-projects.vercel.app/
 
 ## PCB
 pcb/ember
@@ -16,8 +27,6 @@ All of components except USB Connector is available at jlcpcb pcba service.
 
 ## Case
 pcb/ember_bottom_plate, pcb/ember_top_plate
-![](doc/ember.jpg)
-
 
 ## Communication
 このキーボードはHID&CDC複合デバイスとして認識されます。
