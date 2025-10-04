@@ -85,6 +85,12 @@ export default function Home() {
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isResettingSettings, setIsResettingSettings] = useState(false);
   const [isEnteringDfu, setIsEnteringDfu] = useState(false);
+  const [isManualControlOpen, setIsManualControlOpen] = useState(false);
+  const [manualAddressInput, setManualAddressInput] = useState('0x0000');
+  const [manualValueInput, setManualValueInput] = useState('');
+  const [manualStatusMessage, setManualStatusMessage] = useState<string | null>(null);
+  const [manualErrorMessage, setManualErrorMessage] = useState<string | null>(null);
+  const [manualActionInProgress, setManualActionInProgress] = useState<'read' | 'write' | null>(null);
   
   const { 
     isSupported, 
@@ -96,13 +102,14 @@ export default function Home() {
     connect, 
     disconnect, 
     clearError,
+    readMemory,
+    writeMemory,
     readAllKeyMappings,
     readAllKeySwitchConfigs,
     saveConfiguration,
     resetConfiguration,
     writeKeyMapping,
     startPushDistanceMonitoring,
-    readKeyPushDistance,
     startCalibration,
     stopCalibration,
     readKeySwitchConfig,
@@ -197,6 +204,121 @@ export default function Home() {
   const roundToTenth = useCallback((value: number): number => {
     return Math.round(value * 10) / 10;
   }, []);
+
+  const parseAddressInput = useCallback((input: string): number | null => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const normalized = trimmed.toLowerCase();
+    const value = normalized.startsWith('0x') ? Number.parseInt(normalized, 16) : Number.parseInt(trimmed, 10);
+    if (Number.isNaN(value) || value < 0 || value > 0xffff) {
+      return null;
+    }
+    return value;
+  }, []);
+
+  const parseValueInput = useCallback((input: string): number | null => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const normalized = trimmed.toLowerCase();
+    const value = normalized.startsWith('0x') ? Number.parseInt(normalized, 16) : Number.parseInt(trimmed, 10);
+    if (Number.isNaN(value) || value < 0 || value > 0xff) {
+      return null;
+    }
+    return value;
+  }, []);
+
+  const formatByte = useCallback((value: number): string => {
+    return `0x${value.toString(16).toUpperCase().padStart(2, '0')}`;
+  }, []);
+
+  const handleOpenManualControl = useCallback(() => {
+    setManualStatusMessage(null);
+    setManualErrorMessage(null);
+    setManualActionInProgress(null);
+    setIsManualControlOpen(true);
+  }, []);
+
+  const handleCloseManualControl = useCallback(() => {
+    setIsManualControlOpen(false);
+    setManualActionInProgress(null);
+  }, []);
+
+  const handleManualRead = useCallback(async () => {
+    setManualStatusMessage(null);
+    if (!isConnected) {
+      setManualErrorMessage('キーボードが接続されていません。');
+      return;
+    }
+
+    const addressValue = parseAddressInput(manualAddressInput);
+    if (addressValue === null) {
+      setManualErrorMessage('アドレスが不正です。0x0000〜0xFFFFの範囲で入力してください。');
+      return;
+    }
+
+    setManualErrorMessage(null);
+    setManualActionInProgress('read');
+
+    try {
+      const data = await readMemory(addressValue, 1);
+      if (!data || data.length === 0) {
+        setManualErrorMessage('読み込みに失敗しました。');
+        return;
+      }
+      const byteValue = data[0];
+      const formatted = formatByte(byteValue);
+  setManualValueInput(formatted);
+  setManualStatusMessage(`読み込み成功: ${formatted} (${byteValue})`);
+    } catch (error) {
+      console.error('Manual read failed:', error);
+      setManualErrorMessage('読み込み中にエラーが発生しました。');
+    } finally {
+      setManualActionInProgress(null);
+    }
+  }, [formatByte, isConnected, manualAddressInput, parseAddressInput, readMemory]);
+
+  const handleManualWrite = useCallback(async () => {
+    setManualStatusMessage(null);
+    if (!isConnected) {
+      setManualErrorMessage('キーボードが接続されていません。');
+      return;
+    }
+
+    const addressValue = parseAddressInput(manualAddressInput);
+    if (addressValue === null) {
+      setManualErrorMessage('アドレスが不正です。0x0000〜0xFFFFの範囲で入力してください。');
+      return;
+    }
+
+    const value = parseValueInput(manualValueInput);
+    if (value === null) {
+      setManualErrorMessage('値が不正です。0〜255 もしくは 0x00〜0xFF の範囲で入力してください。');
+      return;
+    }
+
+    setManualErrorMessage(null);
+    setManualActionInProgress('write');
+
+    try {
+      const success = await writeMemory(addressValue, new Uint8Array([value]));
+      if (!success) {
+        setManualErrorMessage('書き込みに失敗しました。');
+        return;
+      }
+      const formatted = formatByte(value);
+  setManualValueInput(formatted);
+  setManualStatusMessage(`書き込み成功: ${formatted} (${value})`);
+    } catch (error) {
+      console.error('Manual write failed:', error);
+      setManualErrorMessage('書き込み中にエラーが発生しました。');
+    } finally {
+      setManualActionInProgress(null);
+    }
+  }, [formatByte, isConnected, manualAddressInput, manualValueInput, parseAddressInput, parseValueInput, writeMemory]);
 
   const handleKeyAssignmentChange = useCallback(
     async (keyId: number, previousCode: number | null, rawValue: string) => {
@@ -740,6 +862,19 @@ export default function Home() {
                         </button>
                       </div>
 
+                      <button
+                        onClick={handleOpenManualControl}
+                        className={`w-full py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                          !isConnected
+                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            : 'bg-purple-600 hover:bg-purple-700 text-white'
+                        }`}
+                        disabled={!isConnected}
+                      >
+                        <span>🛠️</span>
+                        <span>Manual Address Control</span>
+                      </button>
+
                       {!isConnected && (
                         <p className="text-xs text-gray-500">
                           Connect your keyboard to write settings to the device.
@@ -845,13 +980,6 @@ export default function Home() {
                           </div>
                         </div>
                         
-                      </div>
-                    </div>
-
-                    {/* Rapid Trigger */}
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <h4 className="font-semibold text-gray-900 mb-3">Rapid Trigger</h4>
-                      <div className="space-y-4">
                         <label className="flex items-center space-x-3">
                           <input
                             type="checkbox"
@@ -859,7 +987,7 @@ export default function Home() {
                             onChange={async (e) => {
                               const enabled = e.target.checked;
                               updateKeySettings(selectedKeySettings.keyId, { rapidTrigger: enabled });
-                              const success = await writeKeySwitchConfig(selectedKeySettings.keyId, { keyType: enabled ? 1 : 0 });
+                              const success = await writeKeySwitchConfig(selectedKeySettings.keyId, { keyType: enabled ? 3 : 2 });
                               if (!success) {
                                 console.error(`Failed to write rapid trigger mode for key ${selectedKeySettings.keyId}`);
                               }
@@ -935,6 +1063,125 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {isManualControlOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white w-full max-w-md rounded-lg shadow-xl p-6 space-y-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Manual Address Control</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  メモリアドレスを指定して1バイトの読み書きを行います。
+                </p>
+              </div>
+              <button
+                onClick={handleCloseManualControl}
+                className="text-gray-400 hover:text-gray-600"
+                aria-label="Close manual address control"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="manual-address-input">
+                  Address
+                </label>
+                <input
+                  id="manual-address-input"
+                  type="text"
+                  value={manualAddressInput}
+                  onChange={(e) => {
+                    setManualAddressInput(e.target.value);
+                    setManualErrorMessage(null);
+                    setManualStatusMessage(null);
+                  }}
+                  placeholder="例: 0x2000 または 8192"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  autoFocus
+                />
+                <p className="mt-1 text-xs text-gray-500">範囲: 0x0000〜0xFFFF</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="manual-value-input">
+                  Value
+                </label>
+                <input
+                  id="manual-value-input"
+                  type="text"
+                  value={manualValueInput}
+                  onChange={(e) => {
+                    setManualValueInput(e.target.value);
+                    setManualErrorMessage(null);
+                    setManualStatusMessage(null);
+                  }}
+                  placeholder="例: 0x1A または 26"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <p className="mt-1 text-xs text-gray-500">1バイト (0〜255 / 0x00〜0xFF)</p>
+              </div>
+
+              {manualErrorMessage && (
+                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {manualErrorMessage}
+                </div>
+              )}
+
+              {manualStatusMessage && (
+                <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                  {manualStatusMessage}
+                </div>
+              )}
+
+              {!isConnected && (
+                <div className="rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+                  キーボードとの接続が解除されました。再接続後に再度操作してください。
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={handleCloseManualControl}
+                  className="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Close
+                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleManualRead}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      manualActionInProgress === 'read'
+                        ? 'bg-blue-400 text-white cursor-wait'
+                        : isConnected
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    }`}
+                    disabled={manualActionInProgress !== null || !isConnected}
+                  >
+                    {manualActionInProgress === 'read' ? 'Reading...' : 'Read'}
+                  </button>
+                  <button
+                    onClick={handleManualWrite}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      manualActionInProgress === 'write'
+                        ? 'bg-green-400 text-white cursor-wait'
+                        : isConnected
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    }`}
+                    disabled={manualActionInProgress !== null || !isConnected}
+                  >
+                    {manualActionInProgress === 'write' ? 'Writing...' : 'Write'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
