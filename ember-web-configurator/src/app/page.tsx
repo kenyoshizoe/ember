@@ -85,6 +85,14 @@ const MIDI_NOTE_OPTIONS = Array.from({ length: 128 }, (_, note) => {
   };
 });
 
+const KEYBOARD_MODE_OPTIONS = [
+  { value: 0, label: 'Disable', emoji: '⏹' },
+  { value: 2, label: 'Keyboard', emoji: '⌨️' },
+  { value: 3, label: 'MIDI', emoji: '🎹' },
+] as const;
+
+type KeyboardModeValue = (typeof KEYBOARD_MODE_OPTIONS)[number]['value'];
+
 export default function Home() {
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
   const [keySettings, setKeySettings] = useState<Record<number, KeySettings>>({});
@@ -92,6 +100,9 @@ export default function Home() {
   const [midiNotes, setMidiNotes] = useState<Map<number, number>>(new Map());
   const [currentDistance, setCurrentDistance] = useState<number | null>(null);
   const [distanceUpdateTick, setDistanceUpdateTick] = useState(0);
+  const [keyboardMode, setKeyboardMode] = useState<KeyboardModeValue | null>(null);
+  const [isWritingMode, setIsWritingMode] = useState(false);
+  const [modeError, setModeError] = useState<string | null>(null);
   const stopMonitoringRef = useRef<(() => void) | null>(null);
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [writingKeyId, setWritingKeyId] = useState<number | null>(null);
@@ -121,12 +132,14 @@ export default function Home() {
     readMemory,
     writeMemory,
     readAllKeyMappings,
-  readAllMidiNotes,
+    readAllMidiNotes,
     readAllKeySwitchConfigs,
     saveConfiguration,
     resetConfiguration,
     writeKeyMapping,
-  writeMidiNote,
+    writeMidiNote,
+    readKeyboardMode,
+    writeKeyboardMode,
     startPushDistanceMonitoring,
     startCalibration,
     stopCalibration,
@@ -159,6 +172,32 @@ export default function Home() {
     }
   }, [isConnected, readAllMidiNotes]);
 
+  const loadKeyboardMode = useCallback(async () => {
+    if (!isConnected) return;
+
+    try {
+      const modeValue = await readKeyboardMode();
+      if (modeValue === null) {
+        setModeError('キーボードモードの読み込みに失敗しました。');
+        return;
+      }
+
+      const option = KEYBOARD_MODE_OPTIONS.find(option => option.value === modeValue);
+      if (!option) {
+        console.warn('Unknown keyboard mode value received:', modeValue);
+        setModeError('不明なモード値を受信しました。');
+        setKeyboardMode(null);
+        return;
+      }
+
+      setModeError(null);
+      setKeyboardMode(option.value);
+    } catch (error) {
+      console.error('Failed to load keyboard mode:', error);
+      setModeError('キーボードモードの読み込みに失敗しました。');
+    }
+  }, [isConnected, readKeyboardMode]);
+
   // Load key mappings when connected
   useEffect(() => {
     if (isConnected && device) {
@@ -171,6 +210,20 @@ export default function Home() {
       loadMidiNotes();
     }
   }, [isConnected, device, loadMidiNotes]);
+
+  useEffect(() => {
+    if (isConnected && device) {
+      loadKeyboardMode();
+    }
+  }, [isConnected, device, loadKeyboardMode]);
+
+  useEffect(() => {
+    if (!isConnected) {
+      setKeyboardMode(null);
+      setIsWritingMode(false);
+      setModeError(null);
+    }
+  }, [isConnected]);
 
   const getKeyDisplayLabel = (key: KeyDefinition): string => {
     const keyCode = keyMappings.get(key.id);
@@ -464,6 +517,37 @@ export default function Home() {
     [isConnected, updateKeySettings, writeMidiNote]
   );
 
+  const handleKeyboardModeChange = useCallback(
+    async (targetMode: KeyboardModeValue) => {
+      if (!isConnected) {
+        setModeError('キーボードが接続されていません。');
+        return;
+      }
+
+      if (keyboardMode === targetMode || isWritingMode) {
+        return;
+      }
+
+      setIsWritingMode(true);
+      setModeError(null);
+
+      try {
+        const success = await writeKeyboardMode(targetMode);
+        if (!success) {
+          throw new Error('Device rejected keyboard mode');
+        }
+        setKeyboardMode(targetMode);
+      } catch (error) {
+        console.error('Failed to write keyboard mode', error);
+        setModeError('キーボードモードの書き込みに失敗しました。');
+        await loadKeyboardMode();
+      } finally {
+        setIsWritingMode(false);
+      }
+    },
+    [isConnected, keyboardMode, isWritingMode, writeKeyboardMode, loadKeyboardMode]
+  );
+
   const buildDefaultKeySettings = useCallback((): Record<number, KeySettings> => {
     const defaults: Record<number, KeySettings> = {};
     EMBER_KEYS.forEach((key) => {
@@ -547,16 +631,18 @@ export default function Home() {
         }
         await loadKeyMappings();
         await loadMidiNotes();
+        await loadKeyboardMode();
         await refreshKeySettingsFromDevice();
       } else {
         setKeySettings(buildDefaultKeySettings());
+        setKeyboardMode(null);
       }
     } catch (error) {
       console.error('Failed to reset settings to default:', error);
     } finally {
       setIsResettingSettings(false);
     }
-  }, [buildDefaultKeySettings, isConnected, loadKeyMappings, loadMidiNotes, refreshKeySettingsFromDevice, resetConfiguration]);
+  }, [buildDefaultKeySettings, isConnected, loadKeyMappings, loadMidiNotes, loadKeyboardMode, refreshKeySettingsFromDevice, resetConfiguration]);
 
   const handleEnterDfuMode = useCallback(async () => {
     if (!isConnected) {
@@ -897,6 +983,49 @@ export default function Home() {
                 <div className="bg-white rounded-lg p-4 shadow-sm mt-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Control Panel</h4>
                   <div className="grid grid-cols-1 gap-3">
+                    <div className="space-y-2">
+                      <span className="text-sm font-semibold text-gray-700">Mode</span>
+                      <div className="flex flex-wrap gap-3">
+                        {KEYBOARD_MODE_OPTIONS.map((option) => {
+                          const isActive = keyboardMode === option.value;
+                          const isDisabled = !isConnected || isWritingMode;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => handleKeyboardModeChange(option.value)}
+                              disabled={isDisabled}
+                              className={`flex flex-col items-center px-3 py-2 rounded-xl border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 ${
+                                isActive
+                                  ? 'bg-blue-50 border-blue-400 text-blue-700'
+                                  : 'bg-gray-100 border-transparent text-gray-600 hover:bg-gray-200'
+                              } ${
+                                isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                              }`}
+                            >
+                              <span
+                                className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
+                                  isActive ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'
+                                }`}
+                              >
+                                {option.emoji}
+                              </span>
+                              <span className="mt-2 text-xs font-medium">{option.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {!isConnected && (
+                        <p className="text-xs text-gray-500">接続するとキーボードモードを変更できます。</p>
+                      )}
+                      {isWritingMode && isConnected && (
+                        <p className="text-xs text-blue-600">モードを書き込み中...</p>
+                      )}
+                      {modeError && (
+                        <p className="text-xs text-red-600">{modeError}</p>
+                      )}
+                    </div>
+
                     {/* Calibration Controls */}
                     <div className="flex space-x-2">
                       <button
