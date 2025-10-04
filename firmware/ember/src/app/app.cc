@@ -28,27 +28,16 @@ void usb_bootloader_init() {
   // Check if we need to jump to the bootloader
   if (switchToBootloader == 0x11) {
     void (*SysMemBootJump)(void);
-    switchToBootloader =
-        0x00;  // Reset the variable to prevent being stuck in the bootloader
-               // (since a device reset wont change it)
-    volatile uint32_t addr =
-        0x1FFFD800;  // The STM32G431KB system memory start address
-    SysMemBootJump = (void (*)(void))(
-        *((uint32_t*)(addr +
-                      4)));  // Point the PC to the System Memory reset vector
-
+    switchToBootloader = 0x00;
+    volatile uint32_t addr = 0x1FFFD800;
+    SysMemBootJump = (void (*)(void))(*((uint32_t*)(addr + 4)));
     HAL_RCC_DeInit();   // Reset the system clock
     SysTick->CTRL = 0;  // Reset the  SysTick Timer
     SysTick->LOAD = 0;
     SysTick->VAL = 0;
-
     __set_MSP(*(uint32_t*)addr);  // Set the Main Stack Pointer
-
-    SysMemBootJump();  // Run our virtual function defined above that sets the
-                       // PC
-
-    while (1)
-      ;
+    SysMemBootJump();
+    while (1);
   }
 }
 
@@ -56,11 +45,11 @@ void setup() {
   SEGGER_RTT_Init();
   // Load Config
   bool load_success = ember::Flash::LoadConfig(config);
+  if (!load_success) {
+    config.mode = ember::Config::Mode::DISABLED;
+  }
   keyboard = new ember::Keyboard(config);
   // Start Calibrate at first time
-  if (!load_success) {
-    keyboard->StartCalibrate();
-  }
   // Init modules
   amux1.Init();
   amux2.Init();
@@ -76,11 +65,9 @@ void setup() {
                                1);
   // TinyUSB init
 
-  tusb_rhport_init_t dev_init = {
-    .role = TUSB_ROLE_DEVICE,
-    .speed = TUSB_SPEED_AUTO
-  };
-  tusb_init(0, &dev_init); // initialize device stack on roothub port 0
+  tusb_rhport_init_t dev_init = {.role = TUSB_ROLE_DEVICE,
+                                 .speed = TUSB_SPEED_AUTO};
+  tusb_init(0, &dev_init);  // initialize device stack on roothub port 0
 
   // Start Timer
   HAL_TIM_Base_Start_IT(&htim17);
@@ -95,6 +82,7 @@ void setup() {
 void loop() { tud_task(); }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
+  // 250Hz
   if (htim == &htim17) {
     if (adc12_running || adc34_running) {
       SEGGER_RTT_printf(0, "ADC is running\n");
