@@ -39,6 +39,10 @@ const KEY_CONFIG_OFFSETS = {
 const KEY_CONFIG_SCALE = 0.1;
 const TOTAL_KEY_COUNT = 32;
 
+const MIDI_NOTE_BASE_ADDRESS = 0x0100;
+const MIDI_NOTE_MIN = 0;
+const MIDI_NOTE_MAX = 127;
+
 const PUSH_DISTANCE_BASE_ADDRESS = 0x2000;
 const PUSH_DISTANCE_INTERVAL_MS = 10;
 const PUSH_DISTANCE_MAX_CONSECUTIVE_ERRORS = 5;
@@ -50,6 +54,8 @@ const clamp = (value: number, min: number, max: number): number => {
 
 const keyConfigAddress = (keyId: number, offset: number = 0): number =>
   KEY_CONFIG_BASE_ADDRESS + keyId * KEY_CONFIG_SIZE + offset;
+
+const midiNoteAddress = (keyId: number): number => MIDI_NOTE_BASE_ADDRESS + keyId;
 
 const isTimeoutError = (error: unknown): boolean =>
   error instanceof Error && error.message.toLowerCase().includes('timeout');
@@ -84,6 +90,38 @@ const writeKeyMappingToDevice = async (protocol: EmberProtocol, keyId: number, k
     return response.success;
   } catch (error) {
     console.error(`Failed to write key mapping for key ${keyId}:`, error);
+    return false;
+  }
+};
+
+const readMidiNoteFromDevice = async (protocol: EmberProtocol, keyId: number): Promise<number | null> => {
+  try {
+    const response = await protocol.readQuery(midiNoteAddress(keyId), 1);
+
+    if (!response.success) {
+      console.warn(`MIDI note ${keyId}: response not successful`);
+      return null;
+    }
+
+    if (!response.data || response.data.length === 0) {
+      console.warn(`MIDI note ${keyId}: no data in response`);
+      return null;
+    }
+
+    return clamp(response.data[0], MIDI_NOTE_MIN, MIDI_NOTE_MAX);
+  } catch (error) {
+    console.error(`Failed to read MIDI note for key ${keyId}:`, error);
+    return null;
+  }
+};
+
+const writeMidiNoteToDevice = async (protocol: EmberProtocol, keyId: number, midiNote: number): Promise<boolean> => {
+  try {
+    const value = clamp(Math.round(midiNote), MIDI_NOTE_MIN, MIDI_NOTE_MAX);
+    const response = await protocol.writeQuery(midiNoteAddress(keyId), new Uint8Array([value]));
+    return response.success;
+  } catch (error) {
+    console.error(`Failed to write MIDI note for key ${keyId}:`, error);
     return false;
   }
 };
@@ -207,10 +245,12 @@ export interface UseKeyboardReturn extends KeyboardState {
   readMemory: (address: number, length: number) => Promise<Uint8Array | null>;
   writeMemory: (address: number, data: Uint8Array) => Promise<boolean>;
   readAllKeyMappings: () => Promise<Map<number, number>>;
+  readAllMidiNotes: () => Promise<Map<number, number>>;
   readAllKeySwitchConfigs: () => Promise<Map<number, KeySwitchConfigData>>;
   saveConfiguration: () => Promise<boolean>;
   resetConfiguration: () => Promise<boolean>;
   writeKeyMapping: (keyId: number, keyCode: number) => Promise<boolean>;
+  writeMidiNote: (keyId: number, midiNote: number) => Promise<boolean>;
   readKeySwitchConfig: (keyId: number) => Promise<KeySwitchConfigData | null>;
   writeKeySwitchConfig: (keyId: number, updates: KeySwitchConfigUpdate) => Promise<boolean>;
   // Push distance monitoring
@@ -425,6 +465,23 @@ export function useKeyboard(): UseKeyboardReturn {
     return mappings;
   }, []);
 
+  const readAllMidiNotesCallback = useCallback(async (): Promise<Map<number, number>> => {
+    const protocol = protocolRef.current;
+    if (!protocol) {
+      throw new Error('No protocol instance available');
+    }
+
+    const notes = new Map<number, number>();
+    for (let keyId = 0; keyId < TOTAL_KEY_COUNT; keyId++) {
+      const note = await readMidiNoteFromDevice(protocol, keyId);
+      if (note !== null) {
+        notes.set(keyId, note);
+      }
+    }
+
+    return notes;
+  }, []);
+
   const readAllKeySwitchConfigsCallback = useCallback(async (): Promise<Map<number, KeySwitchConfigData>> => {
     const protocol = protocolRef.current;
     if (!protocol) {
@@ -459,6 +516,14 @@ export function useKeyboard(): UseKeyboardReturn {
       throw new Error('No protocol instance available');
     }
     return await writeKeyMappingToDevice(protocol, keyId, keyCode);
+  }, []);
+
+  const writeMidiNoteCallback = useCallback(async (keyId: number, midiNote: number): Promise<boolean> => {
+    const protocol = protocolRef.current;
+    if (!protocol) {
+      throw new Error('No protocol instance available');
+    }
+    return await writeMidiNoteToDevice(protocol, keyId, midiNote);
   }, []);
 
   const writeMemoryCallback = useCallback(async (address: number, data: Uint8Array): Promise<boolean> => {
@@ -606,10 +671,12 @@ export function useKeyboard(): UseKeyboardReturn {
     readMemory: readMemoryCallback,
     writeMemory: writeMemoryCallback,
     readAllKeyMappings: readAllKeyMappingsCallback,
+  readAllMidiNotes: readAllMidiNotesCallback,
     readAllKeySwitchConfigs: readAllKeySwitchConfigsCallback,
     saveConfiguration: saveConfigurationCallback,
     resetConfiguration: resetConfigurationCallback,
     writeKeyMapping: writeKeyMappingCallback,
+  writeMidiNote: writeMidiNoteCallback,
     readKeySwitchConfig: readKeySwitchConfigCallback,
     writeKeySwitchConfig: writeKeySwitchConfigCallback,
     startPushDistanceMonitoring: startPushDistanceMonitoringCallback,

@@ -56,6 +56,7 @@ interface KeySettings {
   keyId: number;
   label: string;
   keyCode: number | null;
+  midiNote: number | null;
   actuationPoint: number; // mm
   rapidTrigger: boolean;
   rapidTriggerUpSensitivity: number; // mm
@@ -64,6 +65,7 @@ interface KeySettings {
 
 const DEFAULT_KEY_SETTINGS: Omit<KeySettings, 'keyId' | 'label'> = {
   keyCode: null,
+  midiNote: null,
   actuationPoint: 2.0,
   rapidTrigger: false,
   rapidTriggerUpSensitivity: 0.1,
@@ -72,16 +74,30 @@ const DEFAULT_KEY_SETTINGS: Omit<KeySettings, 'keyId' | 'label'> = {
 
 const DEFAULT_RAPID_TRIGGER_KEY_IDS = new Set([10, 16, 17, 18]);
 
+const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+
+const MIDI_NOTE_OPTIONS = Array.from({ length: 128 }, (_, note) => {
+  const octave = Math.floor(note / 12) - 1;
+  const name = MIDI_NOTE_NAMES[note % 12];
+  return {
+    value: note,
+    label: `${note} - ${name}${octave}`,
+  };
+});
+
 export default function Home() {
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
   const [keySettings, setKeySettings] = useState<Record<number, KeySettings>>({});
   const [keyMappings, setKeyMappings] = useState<Map<number, number>>(new Map());
+  const [midiNotes, setMidiNotes] = useState<Map<number, number>>(new Map());
   const [currentDistance, setCurrentDistance] = useState<number | null>(null);
   const [distanceUpdateTick, setDistanceUpdateTick] = useState(0);
   const stopMonitoringRef = useRef<(() => void) | null>(null);
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [writingKeyId, setWritingKeyId] = useState<number | null>(null);
+  const [writingMidiKeyId, setWritingMidiKeyId] = useState<number | null>(null);
   const [keyMappingError, setKeyMappingError] = useState<{ keyId: number | null; message: string | null }>({ keyId: null, message: null });
+  const [midiMappingError, setMidiMappingError] = useState<{ keyId: number | null; message: string | null }>({ keyId: null, message: null });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isResettingSettings, setIsResettingSettings] = useState(false);
   const [isEnteringDfu, setIsEnteringDfu] = useState(false);
@@ -105,10 +121,12 @@ export default function Home() {
     readMemory,
     writeMemory,
     readAllKeyMappings,
+  readAllMidiNotes,
     readAllKeySwitchConfigs,
     saveConfiguration,
     resetConfiguration,
     writeKeyMapping,
+  writeMidiNote,
     startPushDistanceMonitoring,
     startCalibration,
     stopCalibration,
@@ -129,12 +147,30 @@ export default function Home() {
     }
   }, [isConnected, readAllKeyMappings]);
 
+  const loadMidiNotes = useCallback(async () => {
+    if (!isConnected) return;
+
+    try {
+      const notes = await readAllMidiNotes();
+      setMidiNotes(notes);
+      console.log('Loaded MIDI notes:', notes);
+    } catch (error) {
+      console.error('Failed to load MIDI notes:', error);
+    }
+  }, [isConnected, readAllMidiNotes]);
+
   // Load key mappings when connected
   useEffect(() => {
     if (isConnected && device) {
       loadKeyMappings();
     }
   }, [isConnected, device, loadKeyMappings]);
+
+  useEffect(() => {
+    if (isConnected && device) {
+      loadMidiNotes();
+    }
+  }, [isConnected, device, loadMidiNotes]);
 
   const getKeyDisplayLabel = (key: KeyDefinition): string => {
     const keyCode = keyMappings.get(key.id);
@@ -159,11 +195,13 @@ export default function Home() {
 
   const handleKeyClick = (keyId: number) => {
     setSelectedKey(keyId);
+    setMidiMappingError({ keyId: null, message: null });
     
     // Initialize key settings if not exists
     if (!keySettings[keyId]) {
       const keyDef = EMBER_KEYS.find(k => k.id === keyId);
       const existingKeyCode = keyMappings.get(keyId) ?? null;
+      const existingMidiNote = midiNotes.get(keyId) ?? null;
       
       const hasDefaultRapidTrigger = DEFAULT_RAPID_TRIGGER_KEY_IDS.has(keyId);
       
@@ -174,6 +212,7 @@ export default function Home() {
           label: keyDef?.label || `Key ${keyId}`,
           ...DEFAULT_KEY_SETTINGS,
           keyCode: existingKeyCode,
+          midiNote: existingMidiNote,
           rapidTrigger: hasDefaultRapidTrigger,
         }
       }));
@@ -185,6 +224,17 @@ export default function Home() {
           [keyId]: {
             ...prev[keyId],
             keyCode: existingKeyCode,
+          }
+        }));
+      }
+
+      const existingMidiNote = midiNotes.get(keyId);
+      if (existingMidiNote !== undefined && keySettings[keyId].midiNote === null) {
+        setKeySettings(prev => ({
+          ...prev,
+          [keyId]: {
+            ...prev[keyId],
+            midiNote: existingMidiNote,
           }
         }));
       }
@@ -369,14 +419,61 @@ export default function Home() {
     [isConnected, updateKeySettings, writeKeyMapping]
   );
 
+  const handleMidiNoteChange = useCallback(
+    async (keyId: number, previousNote: number | null, rawValue: string) => {
+      const parsed = Number.parseInt(rawValue, 10);
+      if (Number.isNaN(parsed)) {
+        return;
+      }
+
+      const newNote = Math.min(Math.max(parsed, 0), 127);
+
+      if (previousNote === newNote) {
+        return;
+      }
+
+      updateKeySettings(keyId, { midiNote: newNote });
+      setMidiMappingError({ keyId: null, message: null });
+
+      if (!isConnected) {
+        updateKeySettings(keyId, { midiNote: previousNote ?? null });
+        setMidiMappingError({ keyId, message: 'キーボードが接続されていないため書き込めません。' });
+        return;
+      }
+
+      setWritingMidiKeyId(keyId);
+      try {
+        const success = await writeMidiNote(keyId, newNote);
+        if (!success) {
+          throw new Error('Device rejected MIDI note');
+        }
+
+        setMidiNotes(prev => {
+          const next = new Map(prev);
+          next.set(keyId, newNote);
+          return next;
+        });
+      } catch (error) {
+        console.error('Failed to write MIDI note', error);
+        updateKeySettings(keyId, { midiNote: previousNote ?? null });
+        setMidiMappingError({ keyId, message: 'MIDIノートの書き込みに失敗しました。' });
+      } finally {
+        setWritingMidiKeyId(null);
+      }
+    },
+    [isConnected, updateKeySettings, writeMidiNote]
+  );
+
   const buildDefaultKeySettings = useCallback((): Record<number, KeySettings> => {
     const defaults: Record<number, KeySettings> = {};
     EMBER_KEYS.forEach((key) => {
       const existingKeyCode = keyMappings.get(key.id) ?? null;
+      const existingMidiNote = midiNotes.get(key.id) ?? null;
       defaults[key.id] = {
         keyId: key.id,
         label: key.label || `Key ${key.id}`,
         keyCode: existingKeyCode,
+        midiNote: existingMidiNote,
         actuationPoint: DEFAULT_KEY_SETTINGS.actuationPoint,
         rapidTrigger: DEFAULT_RAPID_TRIGGER_KEY_IDS.has(key.id),
         rapidTriggerUpSensitivity: DEFAULT_KEY_SETTINGS.rapidTriggerUpSensitivity,
@@ -384,7 +481,7 @@ export default function Home() {
       };
     });
     return defaults;
-  }, [keyMappings]);
+  }, [keyMappings, midiNotes]);
 
   const refreshKeySettingsFromDevice = useCallback(async () => {
     if (!isConnected) {
@@ -449,6 +546,7 @@ export default function Home() {
           console.error('Failed to reset configuration on device.');
         }
         await loadKeyMappings();
+        await loadMidiNotes();
         await refreshKeySettingsFromDevice();
       } else {
         setKeySettings(buildDefaultKeySettings());
@@ -458,7 +556,7 @@ export default function Home() {
     } finally {
       setIsResettingSettings(false);
     }
-  }, [buildDefaultKeySettings, isConnected, loadKeyMappings, refreshKeySettingsFromDevice, resetConfiguration]);
+  }, [buildDefaultKeySettings, isConnected, loadKeyMappings, loadMidiNotes, refreshKeySettingsFromDevice, resetConfiguration]);
 
   const handleEnterDfuMode = useCallback(async () => {
     if (!isConnected) {
@@ -617,6 +715,25 @@ export default function Home() {
       return updated;
     });
   }, [keyMappings]);
+
+  useEffect(() => {
+    setKeySettings((prev) => {
+      let updated = prev;
+      midiNotes.forEach((note, keyId) => {
+        const existing = prev[keyId];
+        if (existing && existing.midiNote !== note) {
+          if (updated === prev) {
+            updated = { ...prev };
+          }
+          updated[keyId] = {
+            ...existing,
+            midiNote: note,
+          };
+        }
+      });
+      return updated;
+    });
+  }, [midiNotes]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -908,6 +1025,9 @@ export default function Home() {
                     <h4 className="font-semibold text-gray-900 mb-3">Key Mapping</h4>
                     <div className="space-y-3">
                       <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Key Code
+                        </label>
                         <select
                           value={selectedKeySettings.keyCode !== null ? selectedKeySettings.keyCode.toString() : ''}
                           onChange={(e) => handleKeyAssignmentChange(selectedKeySettings.keyId, selectedKeySettings.keyCode, e.target.value)}
@@ -930,6 +1050,33 @@ export default function Home() {
                         )}
                         {keyMappingError.keyId === selectedKeySettings.keyId && keyMappingError.message && (
                           <p className="mt-2 text-xs text-red-600">{keyMappingError.message}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          MIDI Note
+                        </label>
+                        <select
+                          value={selectedKeySettings.midiNote !== null ? selectedKeySettings.midiNote.toString() : ''}
+                          onChange={(e) => handleMidiNoteChange(selectedKeySettings.keyId, selectedKeySettings.midiNote, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          disabled={writingMidiKeyId === selectedKeySettings.keyId}
+                        >
+                          <option value="" disabled>
+                            Select a MIDI note
+                          </option>
+                          {MIDI_NOTE_OPTIONS.map((option) => (
+                            <option key={option.value} value={String(option.value)}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {writingMidiKeyId === selectedKeySettings.keyId && (
+                          <p className="mt-2 text-xs text-blue-600">MIDIノートを書き込み中...</p>
+                        )}
+                        {midiMappingError.keyId === selectedKeySettings.keyId && midiMappingError.message && (
+                          <p className="mt-2 text-xs text-red-600">{midiMappingError.message}</p>
                         )}
                       </div>
                     </div>
