@@ -86,7 +86,7 @@ const MIDI_NOTE_OPTIONS = Array.from({ length: 128 }, (_, note) => {
 });
 
 const KEYBOARD_MODE_OPTIONS = [
-  { value: 0, label: 'Disable', emoji: '⏹' },
+  { value: 0, label: 'Disable', emoji: '🚫' },
   { value: 2, label: 'Keyboard', emoji: '⌨️' },
   { value: 3, label: 'MIDI', emoji: '🎹' },
 ] as const;
@@ -982,8 +982,8 @@ export default function Home() {
                 {/* Control Panel */}
                 <div className="bg-white rounded-lg p-4 shadow-sm mt-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Control Panel</h4>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="space-y-2">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
                       <span className="text-sm font-semibold text-gray-700">Mode</span>
                       <div className="flex flex-wrap gap-3">
                         {KEYBOARD_MODE_OPTIONS.map((option) => {
@@ -1026,35 +1026,6 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Calibration Controls */}
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={handleStartCalibration}
-                        disabled={!isConnected || isCalibrating}
-                        className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          !isConnected || isCalibrating
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        }`}
-                      >
-                        <span>▶️</span>
-                        <span>Start Calibration</span>
-                      </button>
-                      
-                      <button
-                        onClick={handleStopCalibration}
-                        disabled={!isConnected || !isCalibrating}
-                        className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          !isConnected || !isCalibrating
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-red-600 hover:bg-red-700 text-white'
-                        }`}
-                      >
-                        <span>⏹️</span>
-                        <span>Stop Calibration</span>
-                      </button>
-                    </div>
-
                     {/* Calibration Status */}
                     {isCalibrating && (
                       <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded-md text-sm">
@@ -1065,21 +1036,39 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Global Key Actions */}
-                    <div className="space-y-3">
+                    {/* Calibration Controls */}
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={isCalibrating ? handleStopCalibration : handleStartCalibration}
+                        disabled={!isConnected}
+                        className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                          !isConnected
+                            ? 'bg-gray-400 text-white cursor-not-allowed'
+                            : isCalibrating
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        <span>{isCalibrating ? '⏹️' : '▶️'}</span>
+                        <span>{isCalibrating ? 'Stop Calibration' : 'Start Calibration'}</span>
+                      </button>
+
                       <button
                         onClick={handleSaveAllSettings}
-                        className={`w-full py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                        className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
                           isSavingSettings || !isConnected || Object.keys(keySettings).length === 0
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            : 'bg-gray-600 hover:bg-gray-700 text-white'
                         }`}
                         disabled={isSavingSettings || !isConnected || Object.keys(keySettings).length === 0}
                       >
                         <span>{isSavingSettings ? '⏳' : '💾'}</span>
-                        <span>{isSavingSettings ? 'Saving All Settings...' : 'Save Settings'}</span>
+                        <span>{isSavingSettings ? 'Saving…' : 'Save Settings'}</span>
                       </button>
+                    </div>
 
+                    {/* Global Key Actions */}
+                    <div className="space-y-3">
                       <div className="flex space-x-2">
                         <button
                           onClick={handleResetAllSettings}
