@@ -15,7 +15,7 @@ struct KeySwitchConfig {
     CALIBRATE = 1,
     THRESHOLD = 2,
     RAPID_TRIGGER = 3
-  } key_type = KeyType::DISABLED;
+  } key_type = KeyType::THRESHOLD;
   // actuation point in 0.1mm unit
   uint8_t actuation_point = 10;
   // RappidTrigger Settings
