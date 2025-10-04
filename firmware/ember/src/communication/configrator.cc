@@ -134,7 +134,7 @@ void Configurator::ProcessCompleteMessage() {
     response[0] = 0x01;
     response[1] = address >> 8;
     response[2] = address & 0xFF;
-    response[3] = length;
+    response[3] = 0x00;
     uint8_t* data = decoded_buf + 4;
 
     // Key Settings
@@ -155,49 +155,46 @@ void Configurator::ProcessCompleteMessage() {
     }
 
     // Device Control
-    if (0x3000 <= address && address + length - 1 <= 0x3004) {
-      for (unsigned int i = 0; i < length; i++) {
-        switch (address + i) {
-          case 0x3000:
-            // Save Config
-            Flash::SaveConfig(*config_);
-            response[0] = 0x00;
-            break;
-          case 0x3001:
-            // Calibration
-            if (data[i] == 0x00) {
-              // Stop Calibration
-              config_->mode = Config::Mode::KEYBOARD;
-              response[0] = 0x00;
-            } else {
-              // Start Calibration
-              config_->mode = Config::Mode::CALIBRATE;
-              response[0] = 0x00;
-            }
-            break;
-          case 0x3002:
-            // Reset config to default
-            *config_ = Flash::GetDefaultConfig();
-            response[0] = 0x00;
-            break;
-          case 0x3003:
-            // Reset MCU
-            HAL_NVIC_SystemReset();
-            break;
-          case 0x3004:
-            // Enter DFU Mode
-            switchToBootloader = 0x11;
-            NVIC_SystemReset();
-            break;
-        }
-      }
-    }
-
-    if (0x4000 == address && length == 1) {
-      // Mode
-      if (data[0] <= static_cast<uint8_t>(Config::Mode::MIDI)) {
-        config_->mode = static_cast<Config::Mode>(data[0]);
-        response[0] = 0x00;
+    if (0x3000 <= address && length == 1) {
+      response[0] = 0x00;
+      switch (address) {
+        case 0x3000:
+          // Save Config
+          response[0] = Flash::SaveConfig(*config_);
+          break;
+        case 0x3001:
+          // Calibration
+          if (data[0] == 0x00) {
+            // Stop Calibration
+            config_->mode = Config::Mode::KEYBOARD;
+          } else {
+            // Start Calibration
+            config_->mode = Config::Mode::CALIBRATE;
+          }
+          break;
+        case 0x3002:
+          // Reset config to default
+          *config_ = Flash::GetDefaultConfig();
+          config_->mode = Config::Mode::DISABLED;
+          break;
+        case 0x3003:
+          // Reset MCU
+          HAL_NVIC_SystemReset();
+          break;
+        case 0x3004:
+          // Enter DFU Mode
+          switchToBootloader = 0x11;
+          NVIC_SystemReset();
+          break;
+        case 0x4000:
+          if (data[0] <= static_cast<uint8_t>(Config::Mode::MIDI)) {
+            config_->mode = static_cast<Config::Mode>(data[0]);
+          }
+          break;
+        default:
+          // Unknown command
+          response[0] = 0x01;
+          break;
       }
     }
 

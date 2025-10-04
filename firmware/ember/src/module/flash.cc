@@ -4,7 +4,7 @@
 #include "ember/keyboard/keycodes.h"
 
 namespace ember {
-void Flash::SaveConfig(const Config& config) {
+bool Flash::SaveConfig(const Config& config) {
   HAL_FLASH_Unlock();
   FLASH_EraseInitTypeDef erase;
   erase.TypeErase = FLASH_TYPEERASE_PAGES;
@@ -13,23 +13,21 @@ void Flash::SaveConfig(const Config& config) {
   uint32_t page_error = 0;
   auto result = HAL_FLASHEx_Erase(&erase, &page_error);
   if (result != HAL_OK || page_error != 0xFFFFFFFF) {
-    SEGGER_RTT_printf(0, "Erase failed: %08X\n", page_error);
-  } else {
-    SEGGER_RTT_printf(0, "Erase done.\n");
+    HAL_FLASH_Lock();
+    return false;
   }
   // const uint16_t* data = reinterpret_cast<const uint16_t*>(&config);
   uint16_t data[sizeof(Config) / 2];
   for (int i = 0; i < sizeof(Config) / 2; i++) {
     data[i] = reinterpret_cast<const uint16_t*>(&config)[i];
   }
-
   for (int i = 0; i < sizeof(Config) / 2; i++) {
     HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD,
                       kFlashStartAddress + i * sizeof(uint16_t), data[i]);
   }
 
   HAL_FLASH_Lock();
-  SEGGER_RTT_printf(0, "Save config done.\n");
+  return true;
 }
 
 bool Flash::LoadConfig(Config& config) {

@@ -9,7 +9,7 @@
 namespace ember {
 class Flash {
  public:
-  static void SaveConfig(const ember::Config& config);
+  static bool SaveConfig(const ember::Config& config);
   static bool LoadConfig(ember::Config& config);
   static Config GetDefaultConfig();
 
