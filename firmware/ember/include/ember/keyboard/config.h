@@ -42,7 +42,7 @@ struct MIDIConfig {
 
 /**
  * @brief Config
- * @note 289 bytes
+ * @note 324 bytes
  */
 struct Config {
   KeySwitchConfig key_switch_configs[32];                    // 160 bytes
@@ -53,7 +53,8 @@ struct Config {
     CALIBRATE = 1,
     KEYBOARD = 2,
     MIDI = 3
-  } mode = Mode::KEYBOARD;  // 1 byte
+  } mode = Mode::KEYBOARD;    // 1 byte
+  uint8_t reserved[3] = {0};  // 3 bytes for alignment
 } __attribute__((packed));
 }  // namespace ember
 
