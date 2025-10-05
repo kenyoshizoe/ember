@@ -73,40 +73,46 @@ Response (Write)
 Send these query with encoding/decoding with COBS.
 
 ### Address Map
-| Address       | Description                      | W/R |
-| ------------- | -------------------------------- | --- |
-| 0x0000-0x0004 | Key0 Config                      | W/R |
-| 0x0005-0x0009 | Key1 Config                      | W/R |
-| 0x000A-0x000E | Key2 Config                      | W/R |
-| ...           | ...                              | ... |
-| 0x009B-0x009F | Key31 Config                     | W/R |
-| 0x00A0-0x0FFF | Reserved                         | -   |
-| 0x1000-0x1003 | Key0 Calibaration Data           | R   |
-| 0x1004-0x1007 | Key1 Calibaration Data           | R   |
-| ...           | ...                              | ... |
-| 0x107B-0x107F | Key31 Calibration Data           | R   |
-| 0x1080-0x1FFF | Reserved                         | -   |
-| 0x2000        | Key0 Push distance               | R   |
-| 0x2001        | Key1 Push distance               | R   |
-| ...           | ...                              | ... |
-| 0x201F        | Key31 Push distance              | R   |
-| 0x2020-0x2FFF | Reserved                         | -   |
-| 0x3000        | Save Config                      | W   |
-| 0x3001        | Calibration (0=Disable 1=Enable) | W   |
-| 0x3002        | Reset Config to default          | W   |
-| 0x3003        | Reset MCU                        | W   |
-| 0x3004        | Enter DFU                        | W   |
-| 0x3005-0xFFFF | Reserved                         | -   |
+| Address       | Description                                        | W/R |
+| ------------- | -------------------------------------------------- | --- |
+| 0x0000-0x0004 | Key0 Config                                        | W/R |
+| 0x0005-0x0009 | Key1 Config                                        | W/R |
+| 0x000A-0x000E | Key2 Config                                        | W/R |
+| ...           | ...                                                | ... |
+| 0x009B-0x009F | Key31 Config                                       | W/R |
+| 0x00A0-0x00FF | Reserved                                           | -   |
+| 0x0100        | Key1 MIDI Note Number                              | W/R |
+| 0x0101        | Key2 MIDI Note Number                              | W/R |
+| 0x0102        | Key3 MIDI Note Number                              | W/R |
+| ...           | ...                                                | ... |
+| 0x0120-0x0FFF | Reserved                                           | -   |
+| 0x1000-0x1003 | Key0 Calibaration Data                             | R   |
+| 0x1004-0x1007 | Key1 Calibaration Data                             | R   |
+| ...           | ...                                                | ... |
+| 0x107B-0x107F | Key31 Calibration Data                             | R   |
+| 0x1080-0x1FFF | Reserved                                           | -   |
+| 0x2000        | Key0 Push distance                                 | R   |
+| 0x2001        | Key1 Push distance                                 | R   |
+| ...           | ...                                                | ... |
+| 0x201F        | Key31 Push distance                                | R   |
+| 0x2020-0x2FFF | Reserved                                           | -   |
+| 0x3000        | Save Config                                        | W   |
+| 0x3001        | Calibration (0=Disable 1=Enable)                   | W   |
+| 0x3002        | Reset Config to default                            | W   |
+| 0x3003        | Reset MCU                                          | W   |
+| 0x3004        | Enter DFU                                          | W   |
+| 0x3005-0xFFFF | Reserved                                           | -   |
+| 0x4000        | Mode (0=DISABLED, 1=CALIBRATE, 2=KEYBAORD, 3=MIDI) | W/R |
 
 それぞれのキーの設定は次のようになっています。
 Each key config is as follows:
-| Address | Description                               |
-| ------- | ----------------------------------------- |
-| 0x00    | key_code                                  |
-| 0x01    | key_type (0: Threadhold, 1: RapidTrigger) |
-| 0x06    | actuation_point (0.1mm unit)              |
-| 0x07    | rappid_trigger_up_sensivity               |
-| 0x08    | rappid_trigger_down_sensivity             |
+| Address | Description                                                      |
+| ------- | ---------------------------------------------------------------- |
+| 0x00    | key_code                                                         |
+| 0x01    | key_type (0=DISABLED, 1=CALIBRATE, 2=THRESHOLD, 3=RAPID_TRIGGER) |
+| 0x06    | actuation_point (0.1mm unit)                                     |
+| 0x07    | rappid_trigger_up_sensivity                                      |
+| 0x08    | rappid_trigger_down_sensivity                                    |
 
 それぞれのキーのキャリブレーションデータは以下のようになっています。
 Each key calibration data is as follows:

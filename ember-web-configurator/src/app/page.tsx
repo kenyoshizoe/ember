@@ -56,6 +56,7 @@ interface KeySettings {
   keyId: number;
   label: string;
   keyCode: number | null;
+  midiNote: number | null;
   actuationPoint: number; // mm
   rapidTrigger: boolean;
   rapidTriggerUpSensitivity: number; // mm
@@ -64,6 +65,7 @@ interface KeySettings {
 
 const DEFAULT_KEY_SETTINGS: Omit<KeySettings, 'keyId' | 'label'> = {
   keyCode: null,
+  midiNote: null,
   actuationPoint: 2.0,
   rapidTrigger: false,
   rapidTriggerUpSensitivity: 0.1,
@@ -72,19 +74,50 @@ const DEFAULT_KEY_SETTINGS: Omit<KeySettings, 'keyId' | 'label'> = {
 
 const DEFAULT_RAPID_TRIGGER_KEY_IDS = new Set([10, 16, 17, 18]);
 
+const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+
+const MIDI_NOTE_OPTIONS = Array.from({ length: 128 }, (_, note) => {
+  const octave = Math.floor(note / 12) - 1;
+  const name = MIDI_NOTE_NAMES[note % 12];
+  return {
+    value: note,
+    label: `${note} - ${name}${octave}`,
+  };
+});
+
+const KEYBOARD_MODE_OPTIONS = [
+  { value: 0, label: 'Disable', emoji: '🚫' },
+  { value: 2, label: 'Keyboard', emoji: '⌨️' },
+  { value: 3, label: 'MIDI', emoji: '🎹' },
+] as const;
+
+type KeyboardModeValue = (typeof KEYBOARD_MODE_OPTIONS)[number]['value'];
+
 export default function Home() {
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
   const [keySettings, setKeySettings] = useState<Record<number, KeySettings>>({});
   const [keyMappings, setKeyMappings] = useState<Map<number, number>>(new Map());
+  const [midiNotes, setMidiNotes] = useState<Map<number, number>>(new Map());
   const [currentDistance, setCurrentDistance] = useState<number | null>(null);
   const [distanceUpdateTick, setDistanceUpdateTick] = useState(0);
+  const [keyboardMode, setKeyboardMode] = useState<KeyboardModeValue | null>(null);
+  const [isWritingMode, setIsWritingMode] = useState(false);
+  const [modeError, setModeError] = useState<string | null>(null);
   const stopMonitoringRef = useRef<(() => void) | null>(null);
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [writingKeyId, setWritingKeyId] = useState<number | null>(null);
+  const [writingMidiKeyId, setWritingMidiKeyId] = useState<number | null>(null);
   const [keyMappingError, setKeyMappingError] = useState<{ keyId: number | null; message: string | null }>({ keyId: null, message: null });
+  const [midiMappingError, setMidiMappingError] = useState<{ keyId: number | null; message: string | null }>({ keyId: null, message: null });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isResettingSettings, setIsResettingSettings] = useState(false);
   const [isEnteringDfu, setIsEnteringDfu] = useState(false);
+  const [isManualControlOpen, setIsManualControlOpen] = useState(false);
+  const [manualAddressInput, setManualAddressInput] = useState('0x0000');
+  const [manualValueInput, setManualValueInput] = useState('');
+  const [manualStatusMessage, setManualStatusMessage] = useState<string | null>(null);
+  const [manualErrorMessage, setManualErrorMessage] = useState<string | null>(null);
+  const [manualActionInProgress, setManualActionInProgress] = useState<'read' | 'write' | null>(null);
   
   const { 
     isSupported, 
@@ -96,13 +129,18 @@ export default function Home() {
     connect, 
     disconnect, 
     clearError,
+    readMemory,
+    writeMemory,
     readAllKeyMappings,
+    readAllMidiNotes,
     readAllKeySwitchConfigs,
     saveConfiguration,
     resetConfiguration,
     writeKeyMapping,
+    writeMidiNote,
+    readKeyboardMode,
+    writeKeyboardMode,
     startPushDistanceMonitoring,
-    readKeyPushDistance,
     startCalibration,
     stopCalibration,
     readKeySwitchConfig,
@@ -122,12 +160,70 @@ export default function Home() {
     }
   }, [isConnected, readAllKeyMappings]);
 
+  const loadMidiNotes = useCallback(async () => {
+    if (!isConnected) return;
+
+    try {
+      const notes = await readAllMidiNotes();
+      setMidiNotes(notes);
+      console.log('Loaded MIDI notes:', notes);
+    } catch (error) {
+      console.error('Failed to load MIDI notes:', error);
+    }
+  }, [isConnected, readAllMidiNotes]);
+
+  const loadKeyboardMode = useCallback(async () => {
+    if (!isConnected) return;
+
+    try {
+      const modeValue = await readKeyboardMode();
+      if (modeValue === null) {
+        setModeError('キーボードモードの読み込みに失敗しました。');
+        return;
+      }
+
+      const option = KEYBOARD_MODE_OPTIONS.find(option => option.value === modeValue);
+      if (!option) {
+        console.warn('Unknown keyboard mode value received:', modeValue);
+        setModeError('不明なモード値を受信しました。');
+        setKeyboardMode(null);
+        return;
+      }
+
+      setModeError(null);
+      setKeyboardMode(option.value);
+    } catch (error) {
+      console.error('Failed to load keyboard mode:', error);
+      setModeError('キーボードモードの読み込みに失敗しました。');
+    }
+  }, [isConnected, readKeyboardMode]);
+
   // Load key mappings when connected
   useEffect(() => {
     if (isConnected && device) {
       loadKeyMappings();
     }
   }, [isConnected, device, loadKeyMappings]);
+
+  useEffect(() => {
+    if (isConnected && device) {
+      loadMidiNotes();
+    }
+  }, [isConnected, device, loadMidiNotes]);
+
+  useEffect(() => {
+    if (isConnected && device) {
+      loadKeyboardMode();
+    }
+  }, [isConnected, device, loadKeyboardMode]);
+
+  useEffect(() => {
+    if (!isConnected) {
+      setKeyboardMode(null);
+      setIsWritingMode(false);
+      setModeError(null);
+    }
+  }, [isConnected]);
 
   const getKeyDisplayLabel = (key: KeyDefinition): string => {
     const keyCode = keyMappings.get(key.id);
@@ -152,11 +248,13 @@ export default function Home() {
 
   const handleKeyClick = (keyId: number) => {
     setSelectedKey(keyId);
+    setMidiMappingError({ keyId: null, message: null });
     
     // Initialize key settings if not exists
     if (!keySettings[keyId]) {
       const keyDef = EMBER_KEYS.find(k => k.id === keyId);
       const existingKeyCode = keyMappings.get(keyId) ?? null;
+      const existingMidiNote = midiNotes.get(keyId) ?? null;
       
       const hasDefaultRapidTrigger = DEFAULT_RAPID_TRIGGER_KEY_IDS.has(keyId);
       
@@ -167,6 +265,7 @@ export default function Home() {
           label: keyDef?.label || `Key ${keyId}`,
           ...DEFAULT_KEY_SETTINGS,
           keyCode: existingKeyCode,
+          midiNote: existingMidiNote,
           rapidTrigger: hasDefaultRapidTrigger,
         }
       }));
@@ -178,6 +277,17 @@ export default function Home() {
           [keyId]: {
             ...prev[keyId],
             keyCode: existingKeyCode,
+          }
+        }));
+      }
+
+      const existingMidiNote = midiNotes.get(keyId);
+      if (existingMidiNote !== undefined && keySettings[keyId].midiNote === null) {
+        setKeySettings(prev => ({
+          ...prev,
+          [keyId]: {
+            ...prev[keyId],
+            midiNote: existingMidiNote,
           }
         }));
       }
@@ -197,6 +307,121 @@ export default function Home() {
   const roundToTenth = useCallback((value: number): number => {
     return Math.round(value * 10) / 10;
   }, []);
+
+  const parseAddressInput = useCallback((input: string): number | null => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const normalized = trimmed.toLowerCase();
+    const value = normalized.startsWith('0x') ? Number.parseInt(normalized, 16) : Number.parseInt(trimmed, 10);
+    if (Number.isNaN(value) || value < 0 || value > 0xffff) {
+      return null;
+    }
+    return value;
+  }, []);
+
+  const parseValueInput = useCallback((input: string): number | null => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const normalized = trimmed.toLowerCase();
+    const value = normalized.startsWith('0x') ? Number.parseInt(normalized, 16) : Number.parseInt(trimmed, 10);
+    if (Number.isNaN(value) || value < 0 || value > 0xff) {
+      return null;
+    }
+    return value;
+  }, []);
+
+  const formatByte = useCallback((value: number): string => {
+    return `0x${value.toString(16).toUpperCase().padStart(2, '0')}`;
+  }, []);
+
+  const handleOpenManualControl = useCallback(() => {
+    setManualStatusMessage(null);
+    setManualErrorMessage(null);
+    setManualActionInProgress(null);
+    setIsManualControlOpen(true);
+  }, []);
+
+  const handleCloseManualControl = useCallback(() => {
+    setIsManualControlOpen(false);
+    setManualActionInProgress(null);
+  }, []);
+
+  const handleManualRead = useCallback(async () => {
+    setManualStatusMessage(null);
+    if (!isConnected) {
+      setManualErrorMessage('キーボードが接続されていません。');
+      return;
+    }
+
+    const addressValue = parseAddressInput(manualAddressInput);
+    if (addressValue === null) {
+      setManualErrorMessage('アドレスが不正です。0x0000〜0xFFFFの範囲で入力してください。');
+      return;
+    }
+
+    setManualErrorMessage(null);
+    setManualActionInProgress('read');
+
+    try {
+      const data = await readMemory(addressValue, 1);
+      if (!data || data.length === 0) {
+        setManualErrorMessage('読み込みに失敗しました。');
+        return;
+      }
+      const byteValue = data[0];
+      const formatted = formatByte(byteValue);
+  setManualValueInput(formatted);
+  setManualStatusMessage(`読み込み成功: ${formatted} (${byteValue})`);
+    } catch (error) {
+      console.error('Manual read failed:', error);
+      setManualErrorMessage('読み込み中にエラーが発生しました。');
+    } finally {
+      setManualActionInProgress(null);
+    }
+  }, [formatByte, isConnected, manualAddressInput, parseAddressInput, readMemory]);
+
+  const handleManualWrite = useCallback(async () => {
+    setManualStatusMessage(null);
+    if (!isConnected) {
+      setManualErrorMessage('キーボードが接続されていません。');
+      return;
+    }
+
+    const addressValue = parseAddressInput(manualAddressInput);
+    if (addressValue === null) {
+      setManualErrorMessage('アドレスが不正です。0x0000〜0xFFFFの範囲で入力してください。');
+      return;
+    }
+
+    const value = parseValueInput(manualValueInput);
+    if (value === null) {
+      setManualErrorMessage('値が不正です。0〜255 もしくは 0x00〜0xFF の範囲で入力してください。');
+      return;
+    }
+
+    setManualErrorMessage(null);
+    setManualActionInProgress('write');
+
+    try {
+      const success = await writeMemory(addressValue, new Uint8Array([value]));
+      if (!success) {
+        setManualErrorMessage('書き込みに失敗しました。');
+        return;
+      }
+      const formatted = formatByte(value);
+  setManualValueInput(formatted);
+  setManualStatusMessage(`書き込み成功: ${formatted} (${value})`);
+    } catch (error) {
+      console.error('Manual write failed:', error);
+      setManualErrorMessage('書き込み中にエラーが発生しました。');
+    } finally {
+      setManualActionInProgress(null);
+    }
+  }, [formatByte, isConnected, manualAddressInput, manualValueInput, parseAddressInput, parseValueInput, writeMemory]);
 
   const handleKeyAssignmentChange = useCallback(
     async (keyId: number, previousCode: number | null, rawValue: string) => {
@@ -247,14 +472,92 @@ export default function Home() {
     [isConnected, updateKeySettings, writeKeyMapping]
   );
 
+  const handleMidiNoteChange = useCallback(
+    async (keyId: number, previousNote: number | null, rawValue: string) => {
+      const parsed = Number.parseInt(rawValue, 10);
+      if (Number.isNaN(parsed)) {
+        return;
+      }
+
+      const newNote = Math.min(Math.max(parsed, 0), 127);
+
+      if (previousNote === newNote) {
+        return;
+      }
+
+      updateKeySettings(keyId, { midiNote: newNote });
+      setMidiMappingError({ keyId: null, message: null });
+
+      if (!isConnected) {
+        updateKeySettings(keyId, { midiNote: previousNote ?? null });
+        setMidiMappingError({ keyId, message: 'キーボードが接続されていないため書き込めません。' });
+        return;
+      }
+
+      setWritingMidiKeyId(keyId);
+      try {
+        const success = await writeMidiNote(keyId, newNote);
+        if (!success) {
+          throw new Error('Device rejected MIDI note');
+        }
+
+        setMidiNotes(prev => {
+          const next = new Map(prev);
+          next.set(keyId, newNote);
+          return next;
+        });
+      } catch (error) {
+        console.error('Failed to write MIDI note', error);
+        updateKeySettings(keyId, { midiNote: previousNote ?? null });
+        setMidiMappingError({ keyId, message: 'MIDIノートの書き込みに失敗しました。' });
+      } finally {
+        setWritingMidiKeyId(null);
+      }
+    },
+    [isConnected, updateKeySettings, writeMidiNote]
+  );
+
+  const handleKeyboardModeChange = useCallback(
+    async (targetMode: KeyboardModeValue) => {
+      if (!isConnected) {
+        setModeError('キーボードが接続されていません。');
+        return;
+      }
+
+      if (keyboardMode === targetMode || isWritingMode) {
+        return;
+      }
+
+      setIsWritingMode(true);
+      setModeError(null);
+
+      try {
+        const success = await writeKeyboardMode(targetMode);
+        if (!success) {
+          throw new Error('Device rejected keyboard mode');
+        }
+        setKeyboardMode(targetMode);
+      } catch (error) {
+        console.error('Failed to write keyboard mode', error);
+        setModeError('キーボードモードの書き込みに失敗しました。');
+        await loadKeyboardMode();
+      } finally {
+        setIsWritingMode(false);
+      }
+    },
+    [isConnected, keyboardMode, isWritingMode, writeKeyboardMode, loadKeyboardMode]
+  );
+
   const buildDefaultKeySettings = useCallback((): Record<number, KeySettings> => {
     const defaults: Record<number, KeySettings> = {};
     EMBER_KEYS.forEach((key) => {
       const existingKeyCode = keyMappings.get(key.id) ?? null;
+      const existingMidiNote = midiNotes.get(key.id) ?? null;
       defaults[key.id] = {
         keyId: key.id,
         label: key.label || `Key ${key.id}`,
         keyCode: existingKeyCode,
+        midiNote: existingMidiNote,
         actuationPoint: DEFAULT_KEY_SETTINGS.actuationPoint,
         rapidTrigger: DEFAULT_RAPID_TRIGGER_KEY_IDS.has(key.id),
         rapidTriggerUpSensitivity: DEFAULT_KEY_SETTINGS.rapidTriggerUpSensitivity,
@@ -262,7 +565,7 @@ export default function Home() {
       };
     });
     return defaults;
-  }, [keyMappings]);
+  }, [keyMappings, midiNotes]);
 
   const refreshKeySettingsFromDevice = useCallback(async () => {
     if (!isConnected) {
@@ -327,16 +630,19 @@ export default function Home() {
           console.error('Failed to reset configuration on device.');
         }
         await loadKeyMappings();
+        await loadMidiNotes();
+        await loadKeyboardMode();
         await refreshKeySettingsFromDevice();
       } else {
         setKeySettings(buildDefaultKeySettings());
+        setKeyboardMode(null);
       }
     } catch (error) {
       console.error('Failed to reset settings to default:', error);
     } finally {
       setIsResettingSettings(false);
     }
-  }, [buildDefaultKeySettings, isConnected, loadKeyMappings, refreshKeySettingsFromDevice, resetConfiguration]);
+  }, [buildDefaultKeySettings, isConnected, loadKeyMappings, loadMidiNotes, loadKeyboardMode, refreshKeySettingsFromDevice, resetConfiguration]);
 
   const handleEnterDfuMode = useCallback(async () => {
     if (!isConnected) {
@@ -495,6 +801,25 @@ export default function Home() {
       return updated;
     });
   }, [keyMappings]);
+
+  useEffect(() => {
+    setKeySettings((prev) => {
+      let updated = prev;
+      midiNotes.forEach((note, keyId) => {
+        const existing = prev[keyId];
+        if (existing && existing.midiNote !== note) {
+          if (updated === prev) {
+            updated = { ...prev };
+          }
+          updated[keyId] = {
+            ...existing,
+            midiNote: note,
+          };
+        }
+      });
+      return updated;
+    });
+  }, [midiNotes]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -657,34 +982,48 @@ export default function Home() {
                 {/* Control Panel */}
                 <div className="bg-white rounded-lg p-4 shadow-sm mt-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Control Panel</h4>
-                  <div className="grid grid-cols-1 gap-3">
-                    {/* Calibration Controls */}
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={handleStartCalibration}
-                        disabled={!isConnected || isCalibrating}
-                        className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          !isConnected || isCalibrating
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        }`}
-                      >
-                        <span>▶️</span>
-                        <span>Start Calibration</span>
-                      </button>
-                      
-                      <button
-                        onClick={handleStopCalibration}
-                        disabled={!isConnected || !isCalibrating}
-                        className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          !isConnected || !isCalibrating
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-red-600 hover:bg-red-700 text-white'
-                        }`}
-                      >
-                        <span>⏹️</span>
-                        <span>Stop Calibration</span>
-                      </button>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-semibold text-gray-700">Mode</span>
+                      <div className="flex flex-wrap gap-3">
+                        {KEYBOARD_MODE_OPTIONS.map((option) => {
+                          const isActive = keyboardMode === option.value;
+                          const isDisabled = !isConnected || isWritingMode;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => handleKeyboardModeChange(option.value)}
+                              disabled={isDisabled}
+                              className={`flex flex-col items-center px-3 py-2 rounded-xl border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 ${
+                                isActive
+                                  ? 'bg-blue-50 border-blue-400 text-blue-700'
+                                  : 'bg-gray-100 border-transparent text-gray-600 hover:bg-gray-200'
+                              } ${
+                                isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                              }`}
+                            >
+                              <span
+                                className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
+                                  isActive ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'
+                                }`}
+                              >
+                                {option.emoji}
+                              </span>
+                              <span className="mt-2 text-xs font-medium">{option.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {!isConnected && (
+                        <p className="text-xs text-gray-500">接続するとキーボードモードを変更できます。</p>
+                      )}
+                      {isWritingMode && isConnected && (
+                        <p className="text-xs text-blue-600">モードを書き込み中...</p>
+                      )}
+                      {modeError && (
+                        <p className="text-xs text-red-600">{modeError}</p>
+                      )}
                     </div>
 
                     {/* Calibration Status */}
@@ -697,21 +1036,39 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Global Key Actions */}
-                    <div className="space-y-3">
+                    {/* Calibration Controls */}
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={isCalibrating ? handleStopCalibration : handleStartCalibration}
+                        disabled={!isConnected}
+                        className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                          !isConnected
+                            ? 'bg-gray-400 text-white cursor-not-allowed'
+                            : isCalibrating
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        <span>{isCalibrating ? '⏹️' : '▶️'}</span>
+                        <span>{isCalibrating ? 'Stop Calibration' : 'Start Calibration'}</span>
+                      </button>
+
                       <button
                         onClick={handleSaveAllSettings}
-                        className={`w-full py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                        className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
                           isSavingSettings || !isConnected || Object.keys(keySettings).length === 0
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            : 'bg-gray-600 hover:bg-gray-700 text-white'
                         }`}
                         disabled={isSavingSettings || !isConnected || Object.keys(keySettings).length === 0}
                       >
                         <span>{isSavingSettings ? '⏳' : '💾'}</span>
-                        <span>{isSavingSettings ? 'Saving All Settings...' : 'Save Settings'}</span>
+                        <span>{isSavingSettings ? 'Saving…' : 'Save Settings'}</span>
                       </button>
+                    </div>
 
+                    {/* Global Key Actions */}
+                    <div className="space-y-3">
                       <div className="flex space-x-2">
                         <button
                           onClick={handleResetAllSettings}
@@ -739,6 +1096,19 @@ export default function Home() {
                           <span>{isEnteringDfu ? 'Entering DFU...' : 'Enter DFU Mode'}</span>
                         </button>
                       </div>
+
+                      <button
+                        onClick={handleOpenManualControl}
+                        className={`w-full py-2 px-4 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
+                          !isConnected
+                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            : 'bg-purple-600 hover:bg-purple-700 text-white'
+                        }`}
+                        disabled={!isConnected}
+                      >
+                        <span>🛠️</span>
+                        <span>Manual Address Control</span>
+                      </button>
 
                       {!isConnected && (
                         <p className="text-xs text-gray-500">
@@ -773,6 +1143,9 @@ export default function Home() {
                     <h4 className="font-semibold text-gray-900 mb-3">Key Mapping</h4>
                     <div className="space-y-3">
                       <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Key Code
+                        </label>
                         <select
                           value={selectedKeySettings.keyCode !== null ? selectedKeySettings.keyCode.toString() : ''}
                           onChange={(e) => handleKeyAssignmentChange(selectedKeySettings.keyId, selectedKeySettings.keyCode, e.target.value)}
@@ -795,6 +1168,33 @@ export default function Home() {
                         )}
                         {keyMappingError.keyId === selectedKeySettings.keyId && keyMappingError.message && (
                           <p className="mt-2 text-xs text-red-600">{keyMappingError.message}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          MIDI Note
+                        </label>
+                        <select
+                          value={selectedKeySettings.midiNote !== null ? selectedKeySettings.midiNote.toString() : ''}
+                          onChange={(e) => handleMidiNoteChange(selectedKeySettings.keyId, selectedKeySettings.midiNote, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          disabled={writingMidiKeyId === selectedKeySettings.keyId}
+                        >
+                          <option value="" disabled>
+                            Select a MIDI note
+                          </option>
+                          {MIDI_NOTE_OPTIONS.map((option) => (
+                            <option key={option.value} value={String(option.value)}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {writingMidiKeyId === selectedKeySettings.keyId && (
+                          <p className="mt-2 text-xs text-blue-600">MIDIノートを書き込み中...</p>
+                        )}
+                        {midiMappingError.keyId === selectedKeySettings.keyId && midiMappingError.message && (
+                          <p className="mt-2 text-xs text-red-600">{midiMappingError.message}</p>
                         )}
                       </div>
                     </div>
@@ -845,13 +1245,6 @@ export default function Home() {
                           </div>
                         </div>
                         
-                      </div>
-                    </div>
-
-                    {/* Rapid Trigger */}
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <h4 className="font-semibold text-gray-900 mb-3">Rapid Trigger</h4>
-                      <div className="space-y-4">
                         <label className="flex items-center space-x-3">
                           <input
                             type="checkbox"
@@ -859,7 +1252,7 @@ export default function Home() {
                             onChange={async (e) => {
                               const enabled = e.target.checked;
                               updateKeySettings(selectedKeySettings.keyId, { rapidTrigger: enabled });
-                              const success = await writeKeySwitchConfig(selectedKeySettings.keyId, { keyType: enabled ? 1 : 0 });
+                              const success = await writeKeySwitchConfig(selectedKeySettings.keyId, { keyType: enabled ? 3 : 2 });
                               if (!success) {
                                 console.error(`Failed to write rapid trigger mode for key ${selectedKeySettings.keyId}`);
                               }
@@ -935,6 +1328,125 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {isManualControlOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white w-full max-w-md rounded-lg shadow-xl p-6 space-y-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Manual Address Control</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  メモリアドレスを指定して1バイトの読み書きを行います。
+                </p>
+              </div>
+              <button
+                onClick={handleCloseManualControl}
+                className="text-gray-400 hover:text-gray-600"
+                aria-label="Close manual address control"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="manual-address-input">
+                  Address
+                </label>
+                <input
+                  id="manual-address-input"
+                  type="text"
+                  value={manualAddressInput}
+                  onChange={(e) => {
+                    setManualAddressInput(e.target.value);
+                    setManualErrorMessage(null);
+                    setManualStatusMessage(null);
+                  }}
+                  placeholder="例: 0x2000 または 8192"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  autoFocus
+                />
+                <p className="mt-1 text-xs text-gray-500">範囲: 0x0000〜0xFFFF</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="manual-value-input">
+                  Value
+                </label>
+                <input
+                  id="manual-value-input"
+                  type="text"
+                  value={manualValueInput}
+                  onChange={(e) => {
+                    setManualValueInput(e.target.value);
+                    setManualErrorMessage(null);
+                    setManualStatusMessage(null);
+                  }}
+                  placeholder="例: 0x1A または 26"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <p className="mt-1 text-xs text-gray-500">1バイト (0〜255 / 0x00〜0xFF)</p>
+              </div>
+
+              {manualErrorMessage && (
+                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {manualErrorMessage}
+                </div>
+              )}
+
+              {manualStatusMessage && (
+                <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                  {manualStatusMessage}
+                </div>
+              )}
+
+              {!isConnected && (
+                <div className="rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+                  キーボードとの接続が解除されました。再接続後に再度操作してください。
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={handleCloseManualControl}
+                  className="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Close
+                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleManualRead}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      manualActionInProgress === 'read'
+                        ? 'bg-blue-400 text-white cursor-wait'
+                        : isConnected
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    }`}
+                    disabled={manualActionInProgress !== null || !isConnected}
+                  >
+                    {manualActionInProgress === 'read' ? 'Reading...' : 'Read'}
+                  </button>
+                  <button
+                    onClick={handleManualWrite}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      manualActionInProgress === 'write'
+                        ? 'bg-green-400 text-white cursor-wait'
+                        : isConnected
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    }`}
+                    disabled={manualActionInProgress !== null || !isConnected}
+                  >
+                    {manualActionInProgress === 'write' ? 'Writing...' : 'Write'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

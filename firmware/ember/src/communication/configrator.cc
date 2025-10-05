@@ -2,12 +2,10 @@
 
 #include "ember/module/flash.h"
 #include "ember/utils/cobs.h"
-
 #include "tusb.h"
 
 namespace ember {
-void Configurator::Init() {
-}
+void Configurator::Init() {}
 
 void Configurator::Task() {
   // 1文字ずつ読み取り、リングバッファに追加
@@ -17,8 +15,7 @@ void Configurator::Task() {
       if (c == 0x00) {
         ProcessCompleteMessage();
       } else {
-        if (rx_queue_.full())
-          rx_queue_.pop();
+        if (rx_queue_.full()) rx_queue_.pop();
         rx_queue_.push(c);
       }
     }
@@ -36,9 +33,10 @@ void Configurator::ProcessCompleteMessage() {
     rx_queue_.pop();
     write_index++;
   }
-  
+
   // COBS Decode
-  size_t decoded_length = COBS::decode(buf, write_index, decoded_buf); // デリミタを除く
+  size_t decoded_length =
+      COBS::decode(buf, write_index, decoded_buf);  // デリミタを除く
   if (decoded_length < 4) {
     uint8_t response[] = {0x01, 0x00, 0x00, 0x00};
     tud_cdc_write(response, 4);
@@ -48,12 +46,12 @@ void Configurator::ProcessCompleteMessage() {
 
   // Parse
   uint8_t func_code = decoded_buf[0];
-  uint16_t address = decoded_buf[1] << 8 | decoded_buf[2];
-  uint8_t length = decoded_buf[3];
+  unsigned int address = decoded_buf[1] << 8 | decoded_buf[2];
+  unsigned int length = decoded_buf[3];
 
-  if (func_code == 0) { // Read
+  if (func_code == 0) {  // Read
     uint32_t response_length = 4 + length;
-    
+
     // 最大レスポンスサイズを制限
     static constexpr uint32_t MAX_RESPONSE_SIZE = 512;
     if (response_length > MAX_RESPONSE_SIZE) {
@@ -69,8 +67,8 @@ void Configurator::ProcessCompleteMessage() {
     response[2] = address & 0xFF;
     response[3] = length;
 
-    if (0x0000 <= address && address < sizeof(config_->key_switch_configs) &&
-        address + length - 1 < sizeof(config_->key_switch_configs)) {
+    if (0x0000 <= address &&
+        address + length - 1 < 0x0000 + sizeof(config_->key_switch_configs)) {
       // Key Settings
       response[0] = 0x00;
       memcpy(response + 4,
@@ -78,8 +76,17 @@ void Configurator::ProcessCompleteMessage() {
              length);
     }
 
+    if (0x0100 <= address &&
+        address + length - 1 < 0x1000 + sizeof(config_->midi_configs)) {
+      // MIDI Note Number
+      response[0] = 0x00;
+      memcpy(response + 4,
+             reinterpret_cast<uint8_t*>(&config_->midi_configs) +
+                 (address - 0x0100),
+             length);
+    }
+
     if (0x1000 <= address &&
-        address < 0x1000 + sizeof(config_->key_switch_calibration_data) &&
         address + length - 1 <
             0x1000 + sizeof(config_->key_switch_calibration_data)) {
       // Calibration Data
@@ -90,19 +97,24 @@ void Configurator::ProcessCompleteMessage() {
              length);
     }
 
-    if (0x2000 <= address && address < 0x2000 + 32 &&
-        address + length - 1 < 0x2000 + 32) {
+    if (0x2000 <= address && address + length - 1 < 0x2000 + 32) {
       // Push Distance
       response[0] = 0x00;
-      for (int i = 0; i < length; i++) {
-        response[4 + i] =
-            keyboard_->key_switches_[(address - 0x2000) + i]->GetLastPosition();
+      for (unsigned int i = 0; i < length; i++) {
+        response[4 + i] = static_cast<uint8_t>(
+            keyboard_->key_switches_[(address - 0x2000) + i]->GetPosition());
       }
+    }
+
+    if (0x4000 == address) {
+      // Mode
+      response[0] = 0x00;
+      response[4] = static_cast<uint8_t>(config_->mode);
     }
 
     // Send Response
     uint32_t encoded_length = COBS::getEncodedBufferSize(response_length);
-    uint8_t encoded_buf[kBufSize + 256]; // COBSエンコード用の追加バッファ
+    uint8_t encoded_buf[kBufSize + 256];  // COBSエンコード用の追加バッファ
     COBS::encode(response, response_length, encoded_buf);
     encoded_buf[encoded_length] = 0x00;
 
@@ -122,60 +134,74 @@ void Configurator::ProcessCompleteMessage() {
     response[0] = 0x01;
     response[1] = address >> 8;
     response[2] = address & 0xFF;
-    response[3] = length;
+    response[3] = 0x00;
     uint8_t* data = decoded_buf + 4;
 
     // Key Settings
-    if (0x0000 <= address && address <= 0x0120 &&
-        address + length - 1 <= 0x0120) {
+    if (0x0000 <= address &&
+        address + length - 1 <= 0x0000 + sizeof(config_->key_switch_configs)) {
       memcpy(reinterpret_cast<uint8_t*>(&config_->key_switch_configs) + address,
              data, length);
       response[0] = 0x00;
     }
 
+    // MIDI Note Number
+    if (0x0100 <= address &&
+        address + length - 1 <= 0x1000 + sizeof(config_->midi_configs)) {
+      memcpy(reinterpret_cast<uint8_t*>(&config_->midi_configs) +
+                 (address - 0x0100),
+             data, length);
+      response[0] = 0x00;
+    }
+
     // Device Control
-    if (0x3000 <= address && address <= 0x3004 &&
-        address + length - 1 <= 0x3004) {
-      for (int i = 0; i < length; i++) {
-        switch (address + i) {
-          case 0x3000:
-            // Save Config
-            Flash::SaveConfig(*config_);
-            response[0] = 0x00;
-            break;
-          case 0x3001:
-            // Calibration
-            if (data[i] == 0x00) {
-              // Stop Calibration
-              keyboard_->StopCalibrate();
-              response[0] = 0x00;
-            } else {
-              // Start Calibration
-              keyboard_->StartCalibrate();
-              response[0] = 0x00;
-            }
-            break;
-          case 0x3002:
-            // Reset config to default
-            *config_ = Flash::GetDefaultConfig();
-            response[0] = 0x00;
-            break;
-          case 0x3003:
-            // Reset MCU
-            HAL_NVIC_SystemReset();
-            break;
-          case 0x3004:
-            // Enter DFU Mode
-            switchToBootloader = 0x11;
-            NVIC_SystemReset();
-            break;
-        }
+    if (0x3000 <= address && length == 1) {
+      response[0] = 0x00;
+      switch (address) {
+        case 0x3000:
+          // Save Config
+          response[0] = Flash::SaveConfig(*config_);
+          break;
+        case 0x3001:
+          // Calibration
+          if (data[0] == 0x00) {
+            // Stop Calibration
+            config_->mode = Config::Mode::KEYBOARD;
+          } else {
+            // Start Calibration
+            config_->mode = Config::Mode::CALIBRATE;
+          }
+          break;
+        case 0x3002:
+          // Reset config to default
+          *config_ = Flash::GetDefaultConfig();
+          config_->mode = Config::Mode::DISABLED;
+          break;
+        case 0x3003:
+          // Reset MCU
+          HAL_NVIC_SystemReset();
+          break;
+        case 0x3004:
+          // Enter DFU Mode
+          switchToBootloader = 0x11;
+          NVIC_SystemReset();
+          break;
+        case 0x4000:
+          if (data[0] <= static_cast<uint8_t>(Config::Mode::MIDI)) {
+            config_->mode = static_cast<Config::Mode>(data[0]);
+          }
+          break;
+        default:
+          // Unknown command
+          response[0] = 0x01;
+          break;
       }
     }
 
     // Send Response
     uint32_t encoded_length = COBS::getEncodedBufferSize(4);
-    uint8_t encoded_buf[256]; // COBSエンコード用バッファ（4バイト + エンコード用余裕）
+    uint8_t encoded_buf[256];  // COBSエンコード用バッファ（4バイト +
+                               // エンコード用余裕）
     COBS::encode(response, 4, encoded_buf);
     encoded_buf[encoded_length] = 0x00;
     tud_cdc_write(encoded_buf, encoded_length + 1);
@@ -185,6 +211,4 @@ void Configurator::ProcessCompleteMessage() {
 }  // namespace ember
 
 // TinyUSB Callbacks
-void tud_cdc_rx_cb(uint8_t itf) {
-  ember::Configurator::GetInstance()->Task();
-}
+void tud_cdc_rx_cb(uint8_t itf) { ember::Configurator::GetInstance()->Task(); }
