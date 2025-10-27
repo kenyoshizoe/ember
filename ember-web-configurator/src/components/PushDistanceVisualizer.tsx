@@ -99,7 +99,7 @@ const PushDistanceVisualizer: React.FC<PushDistanceVisualizerProps> = ({
         </div>
         
         {/* Bar container */}
-        <div className="relative bg-gray-200 rounded-full h-8 overflow-hidden">
+        <div className="relative bg-gray-200 h-8 overflow-hidden">
           {/* Actuation point marker */}
           <div 
             className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"

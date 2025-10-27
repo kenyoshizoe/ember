@@ -10,12 +10,12 @@ namespace ember {
  */
 struct KeySwitchConfig {
   uint8_t key_code = 0;
-  /**
-   * @brief
-   * 0: ThresholdKey
-   * 1: RappidTrigger
-   */
-  uint8_t key_type = 0;
+  enum class KeyType : uint8_t {
+    DISABLED = 0,
+    CALIBRATE = 1,
+    THRESHOLD = 2,
+    RAPID_TRIGGER = 3
+  } key_type = KeyType::THRESHOLD;
   // actuation point in 0.1mm unit
   uint8_t actuation_point = 10;
   // RappidTrigger Settings
@@ -36,13 +36,25 @@ struct KeySwitchCalibrationData {
   uint16_t min_value = 1000;
 } __attribute__((packed));
 
+struct MIDIConfig {
+  uint8_t note_number = 60;
+} __attribute__((packed));
+
 /**
  * @brief Config
- * @note 288 bytes
+ * @note 324 bytes
  */
 struct Config {
-  KeySwitchConfig key_switch_configs[32]; // 160 bytes
-  KeySwitchCalibrationData key_switch_calibration_data[32]; // 128 bytes
+  KeySwitchConfig key_switch_configs[32];                    // 160 bytes
+  KeySwitchCalibrationData key_switch_calibration_data[32];  // 128 bytes
+  MIDIConfig midi_configs[32];                               // 32 bytes
+  enum class Mode : uint8_t {
+    DISABLED = 0,
+    CALIBRATE = 1,
+    KEYBOARD = 2,
+    MIDI = 3
+  } mode = Mode::KEYBOARD;    // 1 byte
+  uint8_t reserved[3] = {0};  // 3 bytes for alignment
 } __attribute__((packed));
 }  // namespace ember
 

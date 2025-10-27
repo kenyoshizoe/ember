@@ -13,6 +13,7 @@ class KeySwitchBase {
 
   KeySwitchBase(Config& config, CalibrationData& calibration_data)
       : config_(config), calibration_data_(calibration_data) {}
+  virtual ~KeySwitchBase() = default;
 
   /**
    * @brief Update the key state.
@@ -23,19 +24,11 @@ class KeySwitchBase {
   /**
    * @brief Return the key is pressed or not.
    */
-  bool IsPressed() const { return is_pressed_ && !is_calibrating_; }
+  bool IsPressed() const { return is_pressed_; }
   /**
    * @brief Get the Key Code
    */
   uint8_t GetKeyCode() const { return config_.key_code; }
-  /**
-   * @brief Start calibrate the key.
-   */
-  void StartCalibrate();
-  /**
-   * @brief Stop calibrate the key.
-   */
-  void StopCalibrate();
   /**
    * @brief Load the config.
    */
@@ -51,18 +44,38 @@ class KeySwitchBase {
   /**
    * @brief Get the last position in 0.1mm.
    */
-  uint8_t GetLastPosition() const { return last_position_; }
+  float GetPosition() const { return position_; }
+  /**
+   * @brief Get the last velocity in mm/sec.
+   */
+  float GetVelocity() const { return velocity_; }
 
  protected:
-  void Calibrate(uint16_t value);
-  uint8_t ADCValToDistance(uint16_t value);
+  void UpdatePosVel(uint16_t value);
+  float ADCValToDistance(uint16_t value);
 
   bool is_pressed_ = false;
-  bool is_calibrating_ = false;
   Config& config_;
   CalibrationData& calibration_data_;
-  // Last key potision in 0.1mm
-  uint8_t last_position_ = 0;
+
+  float position_ = 0;                                // Unit: 0.1mm
+  float velocity_ = 0;                                // Unit: mm/sec
+  constexpr static double kTimeConstant = 0.01;       // [s]
+  constexpr static double kSamplingInterval = 0.004;  // [s] = 250Hz (htim17)
+};
+
+class DisabledKey : public KeySwitchBase {
+ public:
+  using KeySwitchBase::KeySwitchBase;
+  bool Update(uint16_t value) override { return false; }
+  bool IsPressed() const { return false; }
+};
+
+class CalibratingKey : public KeySwitchBase {
+ public:
+  CalibratingKey(Config& config, CalibrationData& calibration_data);
+  bool Update(uint16_t value) override;
+  bool IsPressed() const { return false; }
 };
 
 class ThresholdKey : public KeySwitchBase {
@@ -82,9 +95,8 @@ class RapidTriggerKey : public KeySwitchBase {
     kRapidTriggerDown,
     kRapidTriggerUp
   } state_ = State::kRest;
-  uint8_t peek_value_ = 0;
+  float peek_value_ = 0;
 };
-
 }  // namespace ember
 
 #endif  // EMBER_KEYBOARD_KEYSWITCH_H_

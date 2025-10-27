@@ -22,13 +22,24 @@ class Keyboard {
    */
   void SetADCValue(uint8_t adc_ch, uint8_t amux_channel, uint16_t value);
 
-  void StartCalibrate();
-  void StopCalibrate();
   Config GetConfig() { return config_; }
 
   KeySwitchBase* key_switches_[32];
 
  private:
+  void UpdateKeyboard();
+  void UpdateMIDI();
+  bool was_pressed_[32] = {false};
+
+  template <typename T>
+  void SetKeyType(std::size_t idx) {
+    if (dynamic_cast<T*>(key_switches_[idx]) == nullptr) {
+      delete key_switches_[idx];
+      key_switches_[idx] = new T(config_.key_switch_configs[idx],
+                                 config_.key_switch_calibration_data[idx]);
+    }
+  }
+
   static int8_t ChToIndex(uint8_t adc_ch, uint8_t amux_channel);
   Config& config_;
 };

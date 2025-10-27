@@ -1,47 +1,81 @@
 #include "ember/keyboard/keyboard.h"
 
+#include <cmath>
+
 namespace ember {
 Keyboard::Keyboard(Config& config) : config_(config) {
-  for (int i = 0; i < 32; i++) {
-    switch (config_.key_switch_configs[i].key_type) {
-      case 0:
-        key_switches_[i] =
-            new ThresholdKey(config_.key_switch_configs[i],
-                             config_.key_switch_calibration_data[i]);
-        break;
-      case 1:
-        key_switches_[i] =
-            new RapidTriggerKey(config_.key_switch_configs[i],
-                                config_.key_switch_calibration_data[i]);
-        break;
-      default:
-        key_switches_[i] =
-            new ThresholdKey(config_.key_switch_configs[i],
-                             config_.key_switch_calibration_data[i]);
-        break;
-    }
-  }
+  for (int i = 0; i < 32; i++)
+    key_switches_[i] = new DisabledKey(config_.key_switch_configs[i],
+                                       config_.key_switch_calibration_data[i]);
 }
 
 void Keyboard::Update() {
+  // Check Key Type and Recreate if needed
+  for (int i = 0; i < 32; i++) {
+    switch (config_.mode) {
+      case Config::Mode::DISABLED:
+        SetKeyType<DisabledKey>(i);
+        continue;
+      case Config::Mode::CALIBRATE:
+        SetKeyType<CalibratingKey>(i);
+        continue;
+      case Config::Mode::KEYBOARD:
+        if (config_.key_switch_configs[i].key_type ==
+            KeySwitchConfig::KeyType::DISABLED) {
+          SetKeyType<DisabledKey>(i);
+        } else if (config_.key_switch_configs[i].key_type ==
+                   KeySwitchConfig::KeyType::CALIBRATE) {
+          SetKeyType<CalibratingKey>(i);
+        } else if (config_.key_switch_configs[i].key_type ==
+                   KeySwitchConfig::KeyType::THRESHOLD) {
+          SetKeyType<ThresholdKey>(i);
+        } else if (config_.key_switch_configs[i].key_type ==
+                   KeySwitchConfig::KeyType::RAPID_TRIGGER) {
+          SetKeyType<RapidTriggerKey>(i);
+        } else {
+          SetKeyType<DisabledKey>(i);
+        }
+        continue;
+      case Config::Mode::MIDI:
+        if (config_.key_switch_configs[i].key_type ==
+            KeySwitchConfig::KeyType::DISABLED) {
+          SetKeyType<DisabledKey>(i);
+        } else {
+          SetKeyType<ThresholdKey>(i);
+        }
+        continue;
+      default:
+        break;
+    }
+  }
+
+  switch (config_.mode) {
+    case Config::Mode::DISABLED:
+      break;
+    case Config::Mode::KEYBOARD:
+      UpdateKeyboard();
+      break;
+    case Config::Mode::MIDI:
+      UpdateMIDI();
+      break;
+  }
+}
+
+void Keyboard::SetADCValue(uint8_t adc_ch, uint8_t amux_channel,
+                           uint16_t value) {
+  int index = ChToIndex(adc_ch, amux_channel);
+  if (index < 0 || 32 <= index) {
+    return;
+  }
+  key_switches_[index]->Update(value);
+}
+
+void Keyboard::UpdateKeyboard() {
   uint8_t key_codes[6] = {0};
   uint8_t modifier = 0;
   uint8_t key_codes_count = 0;
 
   for (int i = 0; i < 32; i++) {
-    // 型チェックと再生成
-    if (config_.key_switch_configs[i].key_type == 0) {
-      if (dynamic_cast<ThresholdKey*>(key_switches_[i]) == nullptr) {
-        delete key_switches_[i];
-        key_switches_[i] = new ThresholdKey(config_.key_switch_configs[i], config_.key_switch_calibration_data[i]);
-      }
-    } else if (config_.key_switch_configs[i].key_type == 1) {
-      if (dynamic_cast<RapidTriggerKey*>(key_switches_[i]) == nullptr) {
-        delete key_switches_[i];
-        key_switches_[i] = new RapidTriggerKey(config_.key_switch_configs[i], config_.key_switch_calibration_data[i]);
-      }
-    }
-
     if (key_switches_[i]->IsPressed()) {
       uint8_t key_code = key_switches_[i]->GetKeyCode();
       if (key_code < 0xE0) {
@@ -58,24 +92,31 @@ void Keyboard::Update() {
   tud_hid_keyboard_report(0, modifier, key_codes);
 }
 
-void Keyboard::SetADCValue(uint8_t adc_ch, uint8_t amux_channel,
-                           uint16_t value) {
-  int index = ChToIndex(adc_ch, amux_channel);
-  if (index < 0 || 32 <= index) {
-    return;
-  }
-  key_switches_[index]->Update(value);
-}
-
-void Keyboard::StartCalibrate() {
+void Keyboard::UpdateMIDI() {
   for (int i = 0; i < 32; i++) {
-    key_switches_[i]->StartCalibrate();
-  }
-}
+    uint8_t cable_number = 0;
 
-void Keyboard::StopCalibrate() {
-  for (int i = 0; i < 32; i++) {
-    key_switches_[i]->StopCalibrate();
+    if (key_switches_[i]->IsPressed() && !was_pressed_[i]) {
+      uint8_t midi_note = config_.midi_configs[i].note_number;
+      uint8_t velocity = 0;  // 0-127
+
+      float vel = key_switches_[i]->GetVelocity();
+      if (vel < 0) vel = 0;
+      if (127 < vel) vel = 127;
+      velocity = static_cast<uint8_t>(std::round(vel));
+
+      uint8_t midi_message[4] = {
+          static_cast<uint8_t>((cable_number << 4) | 0x9), 0x90, midi_note,
+          velocity};
+      tud_midi_packet_write(midi_message);
+
+    } else if (!key_switches_[i]->IsPressed() && was_pressed_[i]) {
+      uint8_t midi_note = config_.midi_configs[i].note_number;
+      uint8_t midi_message[4] = {
+          static_cast<uint8_t>((cable_number << 4) | 0x8), 0x80, midi_note, 0};
+      tud_midi_packet_write(midi_message);
+    }
+    was_pressed_[i] = key_switches_[i]->IsPressed();
   }
 }
 
