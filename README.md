@@ -16,6 +16,8 @@ Meet Ember’s control room in the browser. The Next.js‑powered configurator l
 Launch (Chrome / Edge recommended):
 https://ember-five-blond.vercel.app/
 
+https://x.com/m3ssy_ken/status/1974076255810269626
+
 ## PCB
 pcb/ember
 
