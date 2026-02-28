@@ -588,7 +588,7 @@ export default function Home() {
           next[keyId] = {
             ...baseDefaults,
             keyCode: config.keyCode ?? baseDefaults.keyCode ?? null,
-            rapidTrigger: config.keyType === 1,
+            rapidTrigger: config.keyType === 3,
             actuationPoint: roundToTenth(config.actuationPointMm),
             rapidTriggerUpSensitivity: roundToTenth(config.rapidTriggerUpSensitivityMm),
             rapidTriggerDownSensitivity: roundToTenth(config.rapidTriggerDownSensitivityMm),
@@ -721,7 +721,7 @@ export default function Home() {
           actuationPoint: roundToTenth(config.actuationPointMm),
           rapidTriggerUpSensitivity: roundToTenth(config.rapidTriggerUpSensitivityMm),
           rapidTriggerDownSensitivity: roundToTenth(config.rapidTriggerDownSensitivityMm),
-          rapidTrigger: config.keyType === 1,
+          rapidTrigger: config.keyType === 3,
         });
       } catch (err) {
         console.error(`Failed to load key config for key ${selectedKey}:`, err);
