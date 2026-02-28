@@ -112,9 +112,9 @@ Each key config is as follows:
 | ------- | ---------------------------------------------------------------- |
 | 0x00    | key_code                                                         |
 | 0x01    | key_type (0=DISABLED, 1=CALIBRATE, 2=THRESHOLD, 3=RAPID_TRIGGER) |
-| 0x06    | actuation_point (0.1mm unit)                                     |
-| 0x07    | rappid_trigger_up_sensivity                                      |
-| 0x08    | rappid_trigger_down_sensivity                                    |
+| 0x02    | actuation_point (0.1mm unit)                                     |
+| 0x03    | rappid_trigger_up_sensivity                                      |
+| 0x04    | rappid_trigger_down_sensivity                                    |
 
 それぞれのキーのキャリブレーションデータは以下のようになっています。
 Each key calibration data is as follows:

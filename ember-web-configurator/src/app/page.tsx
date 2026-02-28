@@ -980,7 +980,7 @@ export default function Home() {
                 </div>
                 
                 {/* Control Panel */}
-                <div className="bg-white rounded-lg p-4 shadow-sm mt-4">
+                <div className="bg-white rounded-xl p-5 shadow-md mt-4 border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-3">Control Panel</h4>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
