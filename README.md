@@ -122,3 +122,14 @@ Each key calibration data is as follows:
 | --------- | ----------- |
 | 0x00~0x01 | max_value   |
 | 0x02~0x03 | min_value   |
+
+## License
+
+Unless otherwise noted, all original content in this repository—including the
+firmware, web configurator, scripts, PCB design files, schematics, and case
+design files—is licensed under the [MIT License](LICENSE).
+
+This includes permission to use the design files to manufacture, distribute,
+and sell physical products based on those designs.
+
+Third-party components remain subject to their respective licenses.
